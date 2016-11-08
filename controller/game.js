@@ -26,7 +26,7 @@ Game.prototype.forEachPlayer = function(callback){
   }
 };
 Game.prototype.tick = function() { // To be called from game loop
-  console.log('tick');
+  // console.log('tick');
 };
 
 // Export class
