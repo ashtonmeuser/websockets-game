@@ -1,0 +1,6 @@
+{
+  "name": "websockets-game",
+  "description": "A basic real-time game using WebSockets.",
+  "repository": "https://github.com/ashtonmeuser/websockets-game",
+  "image": "heroku/nodejs"
+}

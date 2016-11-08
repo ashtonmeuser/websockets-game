@@ -1,0 +1,24 @@
+{
+  "name": "websockets-game",
+  "version": "0.0.0",
+  "author": "Ashton Meuser",
+  "description": "A basic real-time game using WebSockets.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "mocha tests"
+  },
+  "dependencies": {
+    "express": "^4.12.3",
+    "socket.io": "^1.3.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ashtonmeuser/websockets-game"
+  },
+  "devDependencies": {
+    "chai": "^2.3.0",
+    "mocha": "^2.2.4",
+    "nodemon": "^1.3.7",
+  }
+}
