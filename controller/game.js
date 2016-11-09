@@ -14,7 +14,7 @@ Game.prototype.reset = function(){
   this.forEachPlayer(this.removePlayer(player.id));
 };
 Game.prototype.state = function(){
-  var players = []
+  var players = [];
   this.forEachPlayer(function(player){ players.push(player); });
   return {
     'players': players.map(toState)
