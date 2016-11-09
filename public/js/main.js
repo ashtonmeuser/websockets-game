@@ -6,7 +6,7 @@ onload = function() {
     // console.log('update state');
   });
 
-  var game = new Game();
+  // var game = new Game();
 
   (function animate(){ // Recursive animation call
     requestAnimationFrame(animate);
