@@ -1,19 +1,15 @@
 onload = function() {
   var canvas = document.getElementById('canvas');
   var socket = io();
+  var game = new Game();
+  var gameView = new GameView(game, canvas, socket);
 
   socket.on('state', function(state) {
-    // console.log('update state');
+    game.updateState(state);
   });
 
-  // var game = new Game();
-
   (function animate(){ // Recursive animation call
+    gameView.update();
     requestAnimationFrame(animate);
   })();
-  date = Date.now();
-  socket.emit('test', {});
-  socket.on('test', function() {
-    console.log('delay (2 way): ', Date.now()-date);
-  })
 };

@@ -31,8 +31,4 @@ socket.on('connection', function(socket){ // Listen for connections
     console.log('Disconnection ', socket.id);
     game.removePlayer(socket.id);
   });
-
-  socket.on('test', function(a){ // Listen for disconnections
-    socket.emit('test', {});
-  });
 });
