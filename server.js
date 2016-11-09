@@ -7,7 +7,7 @@ app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 app.set('port', (process.env.PORT || 5000));
 var server = http.Server(app);
-var io = socketio(server);
+var socket = socketio(server);
 var game = new Game();
 
 app.get('/', function(request, response) {
@@ -20,15 +20,19 @@ server.listen(app.get('port'), function(){
 
 setInterval(function() { // Progress game, emit state
   game.tick();
-  io.emit('state', game.state());
+  socket.emit('state', game.state());
 }, 1000/60);
 
-io.on('connection', function(io){ // Listen for connections
-  console.log('Connection ', io.id);
-  game.addPlayer(io.id);
+socket.on('connection', function(socket){ // Listen for connections
+  console.log('Connection ', socket.id);
+  game.addPlayer(socket.id);
 
-  io.on('disconnect', function(){ // Listen for disconnections
-    console.log('Disconnection ', io.id);
-    game.removePlayer(io.id);
+  socket.on('disconnect', function(){ // Listen for disconnections
+    console.log('Disconnection ', socket.id);
+    game.removePlayer(socket.id);
+  });
+
+  socket.on('test', function(a){ // Listen for disconnections
+    socket.emit('test', {});
   });
 });
