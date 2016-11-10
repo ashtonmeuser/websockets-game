@@ -1,5 +1,6 @@
 var expect = require('chai').expect;
 var Game = require('../controller/game');
+var Vector = require('../model/vector');
 
 describe('game', function(){
   it('should be initialized', function(){
@@ -38,7 +39,11 @@ describe('game', function(){
     var game = new Game();
     game.addPlayer('123');
 
-    var expected = {'players': [{'id': '123'}]};
+    var expected = {'players': [{
+      'id': '123',
+      'position': new Vector(),
+      'radius': 20
+    }]};
 
     expect(game.state()).to.eql(expected);
   });
