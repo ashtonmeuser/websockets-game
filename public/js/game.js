@@ -1,7 +1,8 @@
 // Constructor
 function Game() {
   this.updateState({
-    'players': []
+    'players': [],
+    'obstacles': []
   })
 };
 

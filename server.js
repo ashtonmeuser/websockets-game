@@ -11,6 +11,9 @@ var server = http.Server(app);
 var socket = socketio(server);
 var game = new Game();
 
+game.addObstacles(constants.obstacleCount);
+game.addTeams(constants.teamNames.length);
+
 app.get('/', function(request, response) {
   response.render('pages/index');
 });

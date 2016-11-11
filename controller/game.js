@@ -1,28 +1,46 @@
 var Player = require('../model/player');
+var Team = require('../model/team');
 var Vector = require('../model/vector');
+var StaticRectangle = require('../model/staticRectangle');
 var constants = require('../data/constants');
 
 // Constructor
 function Game() {
-  this.players = {}; // Array of active players
+  this.players = {};
+  this.teams = [];
+  this.obstacles = [];
 }
 
 // Class methods
 Game.prototype.addPlayer = function(id) {
-  this.players[id] = new Player(id);
+  if(this.teams.length < 1) return;
+  var smallestTeam = this.teams.sort(function(a, b) {return (a.length > b.length) ? 1 : -1;})[0];
+  this.players[id] = new Player(id, smallestTeam);
 };
 Game.prototype.removePlayer = function(id) {
+  this.players[id].delete();
   delete this.players[id];
 };
+Game.prototype.addTeams = function(count) {
+  for(var index=0; index<count; index++){
+    this.teams.push(new Team(constants.teamNames[index], constants.teamColors[index]));
+  }
+}
+Game.prototype.addObstacles = function(count) {
+  for(var index=0; index<count; index++){
+    this.obstacles.push(new StaticRectangle(100*(index+1), 100*(index+1), 150, 40));
+  }
+}
 Game.prototype.reset = function(){
-  this.forEachPlayer(this.removePlayer(player.id));
+  this.forEachPlayer(function(player) {this.removePlayer(player.id);}.bind(this));
 };
 Game.prototype.state = function(){
   var players = [];
-  this.forEachPlayer(function(player){ players.push(player); });
+  this.forEachPlayer(function(player) {players.push(player.toState());});
   return {
-    'players': players.map(function(player) {return player.toState();})
-  }
+    'players': players,
+    'obstacles': this.obstacles.map(function(obstacle) {return obstacle.toState();})
+  };
 };
 Game.prototype.forEachPlayer = function(callback){
   for(var id in this.players) {
@@ -44,7 +62,7 @@ Game.prototype.updateVelocities = function() {
     if(player.velocity.magnitude() < constants.minSpeed)
       player.velocity.multiply(0);
     else if(player.velocity.magnitude() > constants.maxPlayerSpeed)
-      player.velocity.multiply(constants.maxPlayerSpeed/player.velocity.magnitude());
+      player.velocity.normal().multiply(constants.maxPlayerSpeed);
   });
 };
 Game.prototype.updatePositions = function() {

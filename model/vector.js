@@ -68,6 +68,9 @@ Vector.prototype.lowerLimit = function(vector) {
 Vector.prototype.magnitude = function() {
   return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
 };
+Vector.prototype.normal = function() {
+  return this.divide(this.magnitude());
+};
 Vector.prototype.map = function(callback) {
   for(var dimension in this){
     this.dimension = callback(this.dimension);

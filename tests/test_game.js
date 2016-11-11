@@ -1,6 +1,9 @@
 var expect = require('chai').expect;
 var Game = require('../controller/game');
+var Player = require('../model/player');
+var StaticRectangle = require('../model/staticRectangle');
 var Vector = require('../model/vector');
+var constants = require('../data/constants');
 
 describe('game', function(){
   it('should be initialized', function(){
@@ -9,21 +12,33 @@ describe('game', function(){
 
   it('should add players', function(){
     var game = new Game();
+    game.addTeams(1);
     game.addPlayer('123');
 
     expect(game.players['123']).to.exist;
   });
 
-  it('should remove players', function(){
+  it('should remove player', function(){
     var game = new Game();
+    game.addTeams(1);
     game.addPlayer('123');
     game.removePlayer('123');
 
     expect(game.players['123']).to.not.exist;
   });
 
+  it('should reset game', function(){
+    var game = new Game();
+    game.addTeams(1);
+    game.addPlayer('123');
+    game.reset();
+
+    expect(game.players).to.be.empty;
+  });
+
   it('should loop over players', function(){
     var game = new Game();
+    game.addTeams(1);
     game.addPlayer('123');
     game.addPlayer('456');
 
@@ -36,14 +51,21 @@ describe('game', function(){
   });
 
   it('should return state', function(){
+    var color = constants.teamColors[0];
     var game = new Game();
+    game.addTeams(1);
     game.addPlayer('123');
 
-    var expected = {'players': [{
-      'id': '123',
-      'position': new Vector(),
-      'radius': 20
-    }]};
+    var expected = {
+      'players': [{
+        'id': '123',
+        'name': 1,
+        'color': 'rgb('+color.r+','+color.g+','+color.b+')',
+        'position': new Vector(),
+        'radius': 20
+      }],
+      'obstacles': []
+    };
 
     expect(game.state()).to.eql(expected);
   });

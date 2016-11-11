@@ -26,8 +26,8 @@ window.onload = function() {
   });
 
   (function animate(){ // Recursive animation call
-    gameView.update();
     getUserInput();
+    gameView.update();
     requestAnimationFrame(animate);
   })();
 
