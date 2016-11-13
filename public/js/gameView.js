@@ -3,6 +3,7 @@ function GameView(game, canvas) {
   this.game = game;
   this.canvas = canvas;
   this.context = this.canvas.getContext('2d');
+  this.scale = 1;
 }
 
 // Class methods
@@ -11,6 +12,7 @@ GameView.prototype.update = function() {
   this.drawPlayers(function(player) {
     this.drawLabel(player.position, player.name);
   }.bind(this));
+  this.drawProjectiles();
   this.drawObstacles();
 };
 GameView.prototype.clear = function() {
@@ -18,13 +20,23 @@ GameView.prototype.clear = function() {
   this.context.clearRect(0, 0, this.bounds.x, this.bounds.y);
 };
 GameView.prototype.drawPlayers = function(callback) {
-  this.game.state.players.forEach(function(player, index) {
+  this.game.state.players.forEach(function(player) {
     this.context.fillStyle = player.color;
     this.context.beginPath();
     this.context.arc(player.position.x, player.position.y, player.radius, 0, 2 * Math.PI);
     this.context.closePath();
     this.context.fill();
     callback(player);
+  }.bind(this));
+};
+GameView.prototype.drawProjectiles = function(callback) {
+  this.game.state.projectiles.forEach(function(projectile) {
+    this.context.fillStyle = projectile.color;
+    this.context.beginPath();
+    this.context.arc(projectile.position.x, projectile.position.y, projectile.radius, 0, 2 * Math.PI);
+    this.context.closePath();
+    this.context.fill();
+    // callback(projectile);
   }.bind(this));
 };
 GameView.prototype.drawObstacles = function() {

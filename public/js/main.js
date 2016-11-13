@@ -1,10 +1,10 @@
 let key_code = {'left': 37, 'right': 39, 'up': 38, 'down': 40};
 var key_state = {'left': false, 'right': false, 'up': false, 'down': false};
-var socket = io();
 
 window.onload = function() {
+  var socket = io();
   var canvas = document.getElementById('canvas');
-  var game = new Game();
+  var game = new Game(socket);
   var gameView = new GameView(game, canvas);
   var mobile = ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch;
 
@@ -18,7 +18,7 @@ window.onload = function() {
       canvas.width = gameView.bounds['x'];
       canvas.height = gameView.bounds['y'];
     }
-    handleResizeCanvas(canvas);
+    handleResizeCanvas(gameView);
   });
 
   socket.on('state', function(state) {
@@ -26,34 +26,23 @@ window.onload = function() {
   });
 
   (function animate(){ // Recursive animation call
-    getUserInput();
     gameView.update();
     requestAnimationFrame(animate);
   })();
 
   window.addEventListener('keydown', handleKeyDown, true);
   window.addEventListener('keyup', handleKeyUp, true);
-  window.addEventListener('resize', function(event){handleResizeCanvas(canvas);});
   if(mobile){
-    canvas.addEventListener('touchstart', handleClick, false);
-    window.addEventListener('deviceorientation', handleAccelerometer, false);
   }else{
-    canvas.addEventListener('click', handleClick, true);
   }
 };
 
-function getUserInput() {
   var x = 0;
   var y = 0;
   if(key_state.left) x -= 1;
   if(key_state.right) x += 1;
   if(key_state.up) y -= 1;
   if(key_state.down) y += 1;
-  updatePlayerAcceleration(x, y);
-}
-
-function updatePlayerAcceleration(x, y) {
-  if(x != 0 || y != 0) socket.emit('updatePlayerAcceleration', x, y);
 }
 
 // Event handlers
@@ -72,25 +61,15 @@ function handleKeyUp(event) {
   }
 }
 
-function handleResizeCanvas(canvas) {
-  let ratio = canvas.width / canvas.height;
 
   if(document.body.clientHeight*ratio < document.body.clientWidth){
-    scale = canvas.height / document.body.clientHeight;
-    canvas.style.width = (100*ratio)+'vh';
-    canvas.style.height = (100)+'vh';
   }else{
-    scale = canvas.width / document.body.clientWidth;
-    canvas.style.width = (100)+'vw';
-    canvas.style.height= (100/ratio)+'vw';
   }
 }
 
-function handleClick(event) {
   event.preventDefault();
 }
 
-function handleAccelerometer(event) {
   var x = 0;
   var y = 0;
   if(Math.abs(event.beta) > 2){
@@ -99,5 +78,4 @@ function handleAccelerometer(event) {
   if(Math.abs(event.gamma) > 2){
     y = -event.gamma/20;
   }
-  updatePlayerAcceleration(x, y);
 }

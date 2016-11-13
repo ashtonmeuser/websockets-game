@@ -37,7 +37,15 @@ socket.on('connection', function(socket){ // Listen for connections
     game.removePlayer(socket.id);
   });
 
+  socket.on('addPlayer', function(){
+    game.addPlayer(socket.id);
+  });
+
   socket.on('updatePlayerAcceleration', function(x, y){
     game.acceleratePlayer(socket.id, x, y);
+  });
+
+  socket.on('addProjectile', function(x, y){
+    game.addProjectile(socket.id, x, y);
   });
 });

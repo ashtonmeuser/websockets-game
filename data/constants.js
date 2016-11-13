@@ -1,4 +1,5 @@
 var Vector = require('../model/vector');
+var Color = require('../model/color');
 
 // Constructor
 const constants = {
@@ -11,13 +12,19 @@ const constants = {
   'playerRadius': 20,
   // Obstacles
   'obstacleCount': 2,
-  'obstacleColor': 'grey',
+  'obstacleColor': new Color(128, 128, 128),
   // Teams
   'teamNames': ['red', 'blue'],
   'teamColors': [
-    {'r': 220, 'g': 70, 'b': 110},
-    {'r': 50, 'g': 180, 'b': 220}
+    new Color(220, 70, 110),
+    new Color(50, 180, 220)
   ],
+  // Projectiles
+  'projectileRadius': 10,
+  'projectileRestitution': 0.6,
+  'projectileFriction': 0.01,
+  'projectileColor': new Color(200, 100, 100),
+  'projectileSpeed': 20,
   // Misc.
   'minSpeed': 0.01
 };

@@ -5,7 +5,7 @@ function Team(name, color) {
   this.name = name;
   this.length = 0;
   this.nextName = 0;
-  this.color = color || {'r': 0, 'g': 0, 'b': 0};
+  this.color = color;
 }
 
 // Class methods

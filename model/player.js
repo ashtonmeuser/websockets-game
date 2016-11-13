@@ -18,7 +18,7 @@ function Player(id, team) {
 Player.prototype.toState = function() {
   return {
     'id': this.id,
-    'color': 'rgb('+this.color.r+','+this.color.g+','+this.color.b+')',
+    'color': this.color.string(),
     'name': this.name,
     'radius': this.radius,
     'position': this.position

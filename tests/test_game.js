@@ -1,7 +1,7 @@
 var expect = require('chai').expect;
 var Game = require('../controller/game');
 var Player = require('../model/player');
-var StaticRectangle = require('../model/staticRectangle');
+var Obstacle = require('../model/obstacle');
 var Vector = require('../model/vector');
 var constants = require('../data/constants');
 
@@ -64,7 +64,8 @@ describe('game', function(){
         'position': new Vector(),
         'radius': 20
       }],
-      'obstacles': []
+      'obstacles': [],
+      'projectiles': []
     };
 
     expect(game.state()).to.eql(expected);

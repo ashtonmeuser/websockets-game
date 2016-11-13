@@ -71,11 +71,8 @@ Vector.prototype.magnitude = function() {
 Vector.prototype.normal = function() {
   return this.divide(this.magnitude());
 };
-Vector.prototype.map = function(callback) {
-  for(var dimension in this){
-    this.dimension = callback(this.dimension);
-  }
-  return this;
+Vector.prototype.dot = function(vector) {
+  return this.x * vector.x + this.y * vector.y;
 };
 Vector.prototype.copy = function() {
   return new Vector(this.x, this.y);
