@@ -6,7 +6,7 @@ window.onload = function() {
   var canvas = document.getElementById('canvas');
   var game = new Game();
   var gameView = new GameView(game, canvas);
-  var mobile = ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch;
+  var mobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
   socket.on('initialize', function(data) {
     gameView.bounds = data.bounds;
@@ -19,7 +19,10 @@ window.onload = function() {
       canvas.height = gameView.bounds['y'];
     }
     handleResizeCanvas(canvas);
+    gameView.pageIntro();
   });
+
+
 
   socket.on('state', function(state) {
     game.updateState(state);

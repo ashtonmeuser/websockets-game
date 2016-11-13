@@ -15,8 +15,8 @@ const constants = {
   // Teams
   'teamNames': ['red', 'blue'],
   'teamColors': [
-    {'r': 220, 'g': 70, 'b': 110},
-    {'r': 50, 'g': 180, 'b': 220}
+    {'r': 220,'g': 70,'b': 110},
+    {'r': 50,'g': 180,'b': 220}
   ],
   // Misc.
   'minSpeed': 0.01
