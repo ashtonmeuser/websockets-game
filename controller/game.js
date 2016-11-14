@@ -73,7 +73,7 @@ Game.prototype.updateVelocities = function() {
     if(projectile.velocity.magnitude() < constants.minSpeed)
       projectile.velocity.multiply(0);
     else if(projectile.velocity.magnitude() > constants.projectileSpeed)
-      projectile.velocity = projectile.velocity.normal().multiply(constants.projectileSpeed);
+      projectile.velocity.normal().multiply(constants.projectileSpeed);
   }); // TODO: Refactor
 };
 Game.prototype.updatePositions = function() {
@@ -100,15 +100,57 @@ Game.prototype.playerCollisions = function() {
 
       var deltaPosition = player1.position.copy().subtract(player2.position);
       while(deltaPosition.magnitude() < 2*player1.radius){
-        if(deltaPosition.magnitude() == 0)
+        if(deltaPosition.magnitude() == 0){
           player1.position.add(player1.radius)
-        else{
+        }else{
           player1.position.add(deltaPosition.copy().normal().divide(2));
           player2.position.subtract(deltaPosition.copy().normal().divide(2));
         }
         deltaPosition = player1.position.copy().subtract(player2.position);
       }
     });
+  }.bind(this));
+};
+Game.prototype.projectileCollisions = function() {
+  this.projectiles.forEach(function(projectile1, index1){
+    this.projectiles.forEach(function(projectile2, index2){
+      if(projectile1 === projectile2) return;
+
+      var deltaPosition = projectile1.position.copy().subtract(projectile2.position);
+      var collisionNormal = deltaPosition.copy().normal();
+      var speed1 = projectile1.velocity.magnitude();
+      var speed2 = projectile2.velocity.magnitude();
+      var hit = false;
+      while(deltaPosition.magnitude() < 2*projectile1.radius){
+        if(deltaPosition.magnitude() == 0){
+          projectile1.position.add(projectile1.radius);
+        }else if(speed1 == 0 && speed2 == 0){
+          projectile1.position.add(collisionNormal.copy().divide(2));
+          projectile2.position.subtract(collisionNormal.copy().divide(2));
+        }else{
+          var ratio = speed1/(speed1+speed2);
+          projectile1.position.subtract(projectile1.velocity.copy().normal().multiply(ratio));
+          projectile2.position.subtract(projectile2.velocity.copy().normal().multiply(1-ratio));
+        }
+        deltaPosition = projectile1.position.copy().subtract(projectile2.position);
+        collisionNormal = deltaPosition.copy().normal();
+        hit = true;
+      }
+      if(hit){
+        var totalSpeed = speed1+speed2;
+        projectile1.add(totalSpeed)
+        var velocity1 = projectile1.velocity.copy();
+        var velocity2 = projectile2.velocity.copy();
+        projectile1.add
+        projectile1.velocity.subtract(collisionNormal.copy().multiply(2*collisionNormal.copy().dot(projectile1.velocity)));
+        projectile2.velocity.subtract(collisionNormal.copy().multiply(2*collisionNormal.copy().dot(projectile2.velocity)));
+        console.log(collisionNormal);
+        console.log(projectile2.velocity);
+        // projectile1.velocity.multiply(0);
+        // projectile2.velocity.multiply(0);
+
+      }
+    }.bind(this));
   }.bind(this));
 };
 Game.prototype.addProjectile = function(id, x, y) {

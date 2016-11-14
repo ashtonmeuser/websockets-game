@@ -88,7 +88,6 @@ function handleClick(event, gameView, game) {
   if(event.type === 'touchstart'){
     var tempX = (event.changedTouches[0].clientX-canvas.offsetLeft)*gameView.scale;
     var tempY = (event.changedTouches[0].clientY-canvas.offsetTop)*gameView.scale;
-    // 0, 1, -1, 0, 0, bounds['y']
     x = tempY;
     y = -tempX + gameView.bounds.y;
   }else if(event.type === 'click'){

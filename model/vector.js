@@ -69,7 +69,8 @@ Vector.prototype.magnitude = function() {
   return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
 };
 Vector.prototype.normal = function() {
-  return this.divide(this.magnitude());
+  var magnitude = this.magnitude();
+  return (magnitude == 0) ? this : this.divide(magnitude);
 };
 Vector.prototype.dot = function(vector) {
   return this.x * vector.x + this.y * vector.y;
