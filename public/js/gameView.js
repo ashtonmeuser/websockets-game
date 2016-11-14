@@ -11,9 +11,13 @@ function GameView(game, canvas, page) {
 
 // Class methods
 GameView.prototype.buildGraphics = function(enterGameButton, body) {
+
   enterGameButton.innerHTML = "Enter Game";
   body.appendChild(enterGameButton);
   enterGameButton.style.visibility = 'visible';
+
+  showImage('avatarStar.png', 40, 40, 500, 400, 'star', body);
+  showImage('avatarYoshi.png', 40, 40, 425, 400, 'yoshi', body);
 }
 
 GameView.prototype.update = function() {
@@ -89,7 +93,7 @@ GameView.prototype.drawObstacles = function() {
   }.bind(this));
 };
 GameView.prototype.drawLabel = function(position, text, size, color) {
-  this.context.fillStyle = color || 'white';
+  this.context.fillStyle = 'rgba('+256+','+256+','+256+','+this.gameTransparency+')';
   this.context.textAlign = 'center';
   this.context.textBaseline = 'middle';
   this.context.font = 'bold '+(size || 25)+'px Arial';
@@ -97,4 +101,17 @@ GameView.prototype.drawLabel = function(position, text, size, color) {
 }
 GameView.prototype.pageChangeGame = function(){
   this.page = 'Game';
+}
+
+//
+function showImage(source, width, height, x, y, alt, body){
+  var avatar = document.createElement('img');
+
+  avatar.id = source;
+  avatar.src = source;
+  avatar.width = width + 'px';
+  avatar.height = height + 'px';
+  avatar.style.top = y + 'px';
+  avatar.style.right = x + 'px';
+  body.appendChild(avatar);
 }
