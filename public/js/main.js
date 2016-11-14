@@ -5,8 +5,11 @@ var socket = io();
 window.onload = function() {
   var canvas = document.getElementById('canvas');
   var game = new Game();
-  var gameView = new GameView(game, canvas);
+  var gameView = new GameView(game, canvas, 'Intro');
   var mobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+  var enterGameButton = document.createElement("button");
+  var body = document.getElementsByTagName("body")[0];
+
 
   socket.on('initialize', function(data) {
     gameView.bounds = data.bounds;
@@ -19,10 +22,8 @@ window.onload = function() {
       canvas.height = gameView.bounds['y'];
     }
     handleResizeCanvas(canvas);
-    gameView.pageIntro();
+    gameView.buildGraphics(enterGameButton, body);
   });
-
-
 
   socket.on('state', function(state) {
     game.updateState(state);
@@ -34,6 +35,9 @@ window.onload = function() {
     requestAnimationFrame(animate);
   })();
 
+  // enterGameButton.addEventListener('click', handleEnterGame(gameView, enterGameButton));
+  enterGameButton.addEventListener('mousedown', handleGameButtonPress, false);
+  enterGameButton.addEventListener('mouseup', handleEnterGame.bind(null, enterGameButton, gameView), false);
   window.addEventListener('keydown', handleKeyDown, true);
   window.addEventListener('keyup', handleKeyUp, true);
   window.addEventListener('resize', function(event){handleResizeCanvas(canvas);});
@@ -60,6 +64,20 @@ function updatePlayerAcceleration(x, y) {
 }
 
 // Event handlers
+function handleGameButtonPress(){
+  this.style.boxShadow = '0 8px 16px 0 rgba(0,0,0,0.1), 0 6px 20px 0 rgba(0,0,0,0.1)';
+}
+
+// Remove the intro screen, raise transparency of game.
+function handleEnterGame(enterGameButton, gameView){
+
+  // Player has entered proper name and chosen icon.
+  if (1){
+    gameView.gameTransparency = 1;
+    gameView.page = 'Game';
+    enterGameButton.style.visibility = 'hidden';
+  }
+}
 
 function handleKeyDown(event) {
   for(var direction in key_code){
