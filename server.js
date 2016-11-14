@@ -24,7 +24,7 @@ server.listen(app.get('port'), function(){
 
 setInterval(function() { // Progress game, emit state
   game.tick();
-  socket.emit('state', game.state());
+  socket.volatile.emit('state', game.state());
 }, 1000/60);
 
 socket.on('connection', function(socket){ // Listen for connections
