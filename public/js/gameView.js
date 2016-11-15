@@ -10,14 +10,25 @@ function GameView(game, canvas, page) {
 }
 
 // Class methods
-GameView.prototype.buildGraphics = function(enterGameButton, body) {
+GameView.prototype.buildGraphics = function() {
 
-  enterGameButton.innerHTML = "Enter Game";
-  body.appendChild(enterGameButton);
-  enterGameButton.style.visibility = 'visible';
+  var body = document.getElementsByTagName("body")[0];
 
-  showImage('avatarStar.png', 40, 40, 500, 400, 'star', body);
-  showImage('avatarYoshi.png', 40, 40, 425, 400, 'yoshi', body);
+  // enterGameButton.innerHTML = "Enter Game";
+  // body.appendChild(enterGameButton);
+  // enterGameButton.style.visibility = 'visible';
+
+  for (var i = 0; i < constants.avatars.length; i++){
+      showItem(constants.avatars[i], 'img', constants.avatarSizeX,
+                constants.avatarSizeY, constants.avatarPosX[i],
+                constants.avatarPosY[i], constants.avatarAlt[i], '');
+  }
+  for (var i = 0; i < constants.buttons.length; i++){
+      showItem(constants.buttons[i], 'button', constants.buttonSizeX[i],
+                constants.buttonSizeY[i], constants.buttonPosX[i],
+                constants.buttonPosY[i], '', 'Enter Game');
+  }
+
 }
 
 GameView.prototype.update = function() {
@@ -40,6 +51,15 @@ GameView.prototype.update = function() {
       this.context.font = '80px Tahoma';
       this.context.fillStyle = 'black';
       this.context.fillText('Poly Wars', 400, 70);
+
+      // Choose Avatars
+      this.context.font = '20px Tahoma';
+      this.context.fillText('Choose your Avatar', 640, 200);
+
+      // Type name
+      this.context.fillText('Enter a Name', 160, 200);
+
+
 
       // Display game in background.
       this.drawPlayers(function(player) {
@@ -103,15 +123,29 @@ GameView.prototype.pageChangeGame = function(){
   this.page = 'Game';
 }
 
-//
-function showImage(source, width, height, x, y, alt, body){
-  var avatar = document.createElement('img');
+// Show the item from 'source' at the location of x,y.
+function showItem(source, type, width, height, x, y, alt, message){
+  var item = '';
+  var body = document.getElementsByTagName("body")[0];
 
-  avatar.id = source;
-  avatar.src = source;
-  avatar.width = width + 'px';
-  avatar.height = height + 'px';
-  avatar.style.top = y + 'px';
-  avatar.style.right = x + 'px';
-  body.appendChild(avatar);
+  // If the item does not already exist, create it.
+  if (!document.getElementById(source)){
+    item = document.createElement(type);
+    item.id = source;
+    if (type == 'img'){
+      item.src = source;
+    } else {
+    //  item.background = 'url('+source+') no-repeat';
+      item.innerHTML = message;
+    }
+    body.appendChild(item);
+  } else { // If item exists, make visible.
+    item = document.getElementById(source);
+    item.style.visibility = 'visible';
+  }
+  // Place the item.
+  item.style.width = width + 'px';
+  item.style.height = height + 'px';
+  item.style.top = y + 'px';
+  item.style.right = x + 'px';
 }

@@ -2,14 +2,31 @@ let key_code = {'left': 37, 'right': 39, 'up': 38, 'down': 40};
 var key_state = {'left': false, 'right': false, 'up': false, 'down': false};
 var socket = io();
 
+// Constructor
+const constants = {
+  // Avatars
+  'avatars': ['avatarStar.png',
+              'avatarYoshi.png'],
+  'avatarPosX': [500, 425],
+  'avatarPosY': [425, 425],
+  'avatarSizeX': 60,
+  'avatarSizeY': 60,
+  'avatarAlt': ['Star',
+                'Yoshi'],
+  'buttons': ['blueButton.jpg'],
+  'buttonPosX': [600],
+  'buttonPosY': [600],
+  'buttonSizeX': [249],
+  'buttonSizeY': [89],
+};
+
+
 window.onload = function() {
   var canvas = document.getElementById('canvas');
   var game = new Game();
   var gameView = new GameView(game, canvas, 'Intro');
   var mobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-  var enterGameButton = document.createElement("button");
-  var body = document.getElementsByTagName("body")[0];
-
+  // var enterGameButton = document.createElement("button-enter");
 
   socket.on('initialize', function(data) {
     gameView.bounds = data.bounds;
@@ -22,8 +39,8 @@ window.onload = function() {
       canvas.height = gameView.bounds['y'];
     }
     handleResizeCanvas(canvas);
-    gameView.buildGraphics(enterGameButton, body);
-  });
+    gameView.buildGraphics();
+  }, constants);
 
   socket.on('state', function(state) {
     game.updateState(state);
@@ -35,9 +52,8 @@ window.onload = function() {
     requestAnimationFrame(animate);
   })();
 
-  // enterGameButton.addEventListener('click', handleEnterGame(gameView, enterGameButton));
-  enterGameButton.addEventListener('mousedown', handleGameButtonPress, false);
-  enterGameButton.addEventListener('mouseup', handleEnterGame.bind(null, enterGameButton, gameView), false);
+  // enterGameButton.addEventListener('mousedown', handleGameButtonPress, false);
+  // enterGameButton.addEventListener('mouseup', handleEnterGame.bind(null, enterGameButton, gameView, constants), false);
   window.addEventListener('keydown', handleKeyDown, true);
   window.addEventListener('keyup', handleKeyUp, true);
   window.addEventListener('resize', function(event){handleResizeCanvas(canvas);});
@@ -69,13 +85,19 @@ function handleGameButtonPress(){
 }
 
 // Remove the intro screen, raise transparency of game.
-function handleEnterGame(enterGameButton, gameView){
+function handleEnterGame(enterGameButton, gameView, constants){
 
   // Player has entered proper name and chosen icon.
   if (1){
     gameView.gameTransparency = 1;
     gameView.page = 'Game';
+
+    // Hide button and graphics.
     enterGameButton.style.visibility = 'hidden';
+
+    for(var i = 0; i < constants.avatars.length; i++){
+      document.getElementById(constants.avatars[i]).style.visibility = 'hidden';
+    }
   }
 }
 
