@@ -10,11 +10,11 @@ window.onload = function() {
 
   socket.on('initialize', function(data) {
     gameView.bounds = data.bounds;
-    if(mobile){
+    if(mobile){ // Portrait
       canvas.width = gameView.bounds['y'];
       canvas.height = gameView.bounds['x'];
       canvas.getContext('2d').transform(0, 1, -1, 0, gameView.bounds['y'], 0);
-    }else{ // Laptop/desktop, landscape
+    }else{ // Landscape
       canvas.width = gameView.bounds['x'];
       canvas.height = gameView.bounds['y'];
     }
@@ -22,6 +22,7 @@ window.onload = function() {
   });
 
   socket.on('state', function(state) {
+    window.s = state;
     game.updateState(state);
   });
 
@@ -94,7 +95,6 @@ function handleClick(event, gameView, game) {
     x = (event.clientX-canvas.offsetLeft)*gameView.scale;
     y = (event.clientY-canvas.offsetTop)*gameView.scale;
   }
-  console.log(game.state);
   game.addProjectile(x, y);
   event.preventDefault();
 }
