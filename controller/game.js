@@ -3,7 +3,6 @@ var Integrator = require('../model/integrator');
 var Team = require('../model/team');
 var Obstacle = require('../model/obstacle');
 var Projectile = require('../model/projectile');
-var Color = require('../model/color');
 var Physics = require('physicsjs');
 
 // Constructor
@@ -14,6 +13,7 @@ function Game() {
   this.extensions();
   this.behaviors();
   this.integrators();
+  this.subscribers();
   // Empty state
   this.players = {};
   this.teams = [];
@@ -21,7 +21,7 @@ function Game() {
   this.projectiles = [];
   // Setup game
   this.addObstacles(1);
-  this.addTeams(2);
+  this.addTeams(['red', 'blue']);
 }
 
 // Instance methods
@@ -33,7 +33,9 @@ Game.prototype.extensions = function() {
 };
 Game.prototype.behaviors = function() {
   this.world.add([
-    Physics.behavior('body-impulse-response'),
+    Physics.behavior('body-impulse-response', {
+      check: 'collisions:desired'
+    }),
     Physics.behavior('body-collision-detection'),
     Physics.behavior('sweep-prune'),
     Physics.behavior('edge-collision-detection', {
@@ -46,25 +48,52 @@ Game.prototype.behaviors = function() {
 Game.prototype.integrators = function() {
   this.world.add(Physics.integrator('verlet-custom'));
 }
+Game.prototype.subscribers = function() {
+  this.world.on('collisions:detected', function(data){
+    for(var i=0; i<data.collisions.length; i++){
+      var collision = data.collisions[i];
+      if(collision.bodyA.name === 'projectile' && collision.bodyB.name === 'player' || collision.bodyA.name === 'player' && collision.bodyB.name === 'projectile'){
+        var player = (collision.bodyA.name === 'player') ? collision.bodyA : collision.bodyB;
+        var projectile = (collision.bodyA.name === 'projectile') ? collision.bodyA : collision.bodyB;
+
+        if(projectile.active){
+          if(!projectile.newborn || projectile.owner.shooter !== player.owner)
+            this.playerHit(player.owner, projectile.owner);
+        }else if(player.owner.ammo < player.owner.maxAmmo){
+          data.collisions.splice(i, 1); // Do not record collision
+          if(player.state.pos.dist(projectile.state.pos) < player.radius)
+            this.ammoPickup(player.owner, projectile.owner);
+        }
+      }
+    }
+    this.world.emit('collisions:desired', data);
+  }.bind(this));
+}
 Game.prototype.addPlayer = function(id) {
   if(this.teams.length < 1) return;
   var smallestTeam = this.teams.sort(function(a, b) {return (a.length > b.length) ? 1 : -1;})[0];
-  var player = new Player(id, smallestTeam, 0, 0);
+  var player = new Player(id, smallestTeam, 100, 100);
 
   this.players[id] = player;
   this.world.add(player.body);
 };
 Game.prototype.removePlayer = function(id) {
   var player = this.players[id];
-  this.world.remove(player.body);
   player.delete();
   delete this.players[id];
 };
-Game.prototype.addTeams = function(count) {
-  var teamColors = [new Color(220, 70, 110), new Color(50, 180, 220)];
-  var teamNames = ['red', 'blue'];
-  for(var index=0; index<count; index++){
-    this.teams.push(new Team(teamNames[index], teamColors[index]));
+Game.prototype.playerHit = function(player, projectile) {
+  player.alive = false;
+  console.log('kill');
+}
+Game.prototype.ammoPickup = function(player, projectile) {
+  player.ammo++;
+  projectile.delete();
+  this.projectiles.splice(this.projectiles.indexOf(projectile), 1);
+}
+Game.prototype.addTeams = function(names) {
+  for(var index=0; index<names.length; index++){
+    this.teams.push(new Team(names[index]));
   }
 }
 Game.prototype.addObstacles = function(count) {
@@ -98,16 +127,20 @@ Game.prototype.tick = function() {
 };
 Game.prototype.acceleratePlayer = function(id, x, y) {
   var player = this.players[id];
-  if(player != undefined){
+  if(player != undefined && player.alive){
     player.body.accelerate(Physics.vector(x, y).normalize().mult(player.body.acceleration));
     player.body.sleep(false);
   }
 };
 Game.prototype.addProjectile = function(id, x, y) {
-  var projectile = new Projectile(this.players[id]);
-  projectile.accelerate(x, y);
-  this.projectiles.push(projectile);
-  this.world.add(projectile.body);
+  var player = this.players[id];
+  if(player != undefined && player.alive && player.ammo>0){
+    player.ammo--;
+    var projectile = new Projectile(this.players[id]);
+    projectile.accelerate(x, y);
+    this.world.add(projectile.body);
+    this.projectiles.push(projectile);
+  }
 }
 
 // Export class

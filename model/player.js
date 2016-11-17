@@ -7,10 +7,13 @@ function Player(id, team, x, y) {
   this.team = team;
   this.team.addPlayer();
   this.name = this.team.nextName;
-  this.color = this.team.color;
+  this.ammo = 3;
+  this.maxAmmo = 5;
+  this.alive = true;
   this.body = Physics.body('player', {
     x: x,
-    y: y
+    y: y,
+    owner: this
   });
 }
 
@@ -18,15 +21,16 @@ function Player(id, team, x, y) {
 Player.prototype.toState = function() {
   return {
     id: this.id,
-    color: this.color.string(),
+    color: (this.alive) ? this.team.aliveColor.string() : this.team.deadColor.string(),
     name: this.name,
     type: this.body.type,
     radius: this.body.radius,
-    position: {x: this.body.state.pos.x, y: this.body.state.pos.y}
+    position: this.body.state.pos.values()
   };
 }
 Player.prototype.delete = function() {
   this.team.removePlayer();
+  this.body._world.remove(this.body);
 }
 Player.prototype.createBody = function() {
   this.team.removePlayer();
@@ -39,7 +43,7 @@ Player.extension = function() {
       init: function(options) {
         Physics.util.extend(options, {
           radius: 20,
-          restitution: 0.4,
+          restitution: 0.2,
           acceleration: 0.005,
           maxSpeed: 0.2,
           mass: 10
