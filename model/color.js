@@ -1,5 +1,3 @@
-var constants = require('../data/constants');
-
 // Constructor
 function Color(r, g, b) {
   this.r = r;
@@ -7,10 +5,12 @@ function Color(r, g, b) {
   this.b = b;
 }
 
-// Class methods
+// Instance methods
 Color.prototype.string = function() {
   return 'rgb('+this.r+','+this.g+','+this.b+')';
 }
+
+// Class methods
 
 // Export class
 module.exports = Color;
