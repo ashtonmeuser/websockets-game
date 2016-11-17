@@ -10,27 +10,6 @@ function GameView(game, canvas, page) {
 }
 
 // Class methods
-GameView.prototype.buildGraphics = function() {
-
-  var body = document.getElementsByTagName("body")[0];
-
-  // enterGameButton.innerHTML = "Enter Game";
-  // body.appendChild(enterGameButton);
-  // enterGameButton.style.visibility = 'visible';
-
-  for (var i = 0; i < constants.avatars.length; i++){
-      showItem(constants.avatars[i], 'img', constants.avatarSizeX,
-                constants.avatarSizeY, constants.avatarPosX[i],
-                constants.avatarPosY[i], constants.avatarAlt[i], '');
-  }
-  for (var i = 0; i < constants.buttons.length; i++){
-      showItem(constants.buttons[i], 'button', constants.buttonSizeX[i],
-                constants.buttonSizeY[i], constants.buttonPosX[i],
-                constants.buttonPosY[i], '', 'Enter Game');
-  }
-
-}
-
 GameView.prototype.update = function() {
 
   this.clear();
@@ -42,31 +21,25 @@ GameView.prototype.update = function() {
 
       // Backfill
       this.context.fillStyle = 'rgba('+150+','+10+','+200+','+.5+')';
-      // this.context.beginPath();
       this.context.fillRect(0,0,800,450);
-      // this.context.closePath();
-      // this.context.fill();
 
-      // Title
-      this.context.font = '80px Tahoma';
-      this.context.fillStyle = 'black';
-      this.context.fillText('Poly Wars', 400, 70);
+      // Text, Avatars and Buttons
+      for (var i = 0; i < constants.button.length; i++){
+        this.drawImage(constants.button[i], constants.buttonPos[i], constants.buttonSize[i]);
+      }
+      for (var i = 0; i < constants.text.length; i++){
+        this.drawText(constants.text[i], constants.textFill[i], constants.textFont[i], constants.textPos[i])
+      }
+      for (var i = 0; i < constants.avatar.length; i++){
+        this.drawImage(constants.avatar[i], constants.avatarPos[i], constants.avatarSize);
+      }
 
-      // Choose Avatars
-      this.context.font = '20px Tahoma';
-      this.context.fillText('Choose your Avatar', 640, 200);
-
-      // Type name
-      this.context.fillText('Enter a Name', 160, 200);
-
-
-
-      // Display game in background.
-      this.drawPlayers(function(player) {
-        this.drawLabel(player.position, player.name);
-      }.bind(this));
-      this.drawObstacles();
-      break;
+      // // Display game in background.
+      // this.drawPlayers(function(player) {
+      //   this.drawLabel(player.position, player.name);
+      // }.bind(this));
+      // this.drawObstacles();
+      // break;
     }
 
     case 'Game': {  // Game - display game in foreground.
@@ -122,30 +95,16 @@ GameView.prototype.drawLabel = function(position, text, size, color) {
 GameView.prototype.pageChangeGame = function(){
   this.page = 'Game';
 }
+GameView.prototype.drawImage = function(source, position, size){
 
-// Show the item from 'source' at the location of x,y.
-function showItem(source, type, width, height, x, y, alt, message){
-  var item = '';
-  var body = document.getElementsByTagName("body")[0];
+  var imgObject = new Image();
 
-  // If the item does not already exist, create it.
-  if (!document.getElementById(source)){
-    item = document.createElement(type);
-    item.id = source;
-    if (type == 'img'){
-      item.src = source;
-    } else {
-    //  item.background = 'url('+source+') no-repeat';
-      item.innerHTML = message;
-    }
-    body.appendChild(item);
-  } else { // If item exists, make visible.
-    item = document.getElementById(source);
-    item.style.visibility = 'visible';
-  }
-  // Place the item.
-  item.style.width = width + 'px';
-  item.style.height = height + 'px';
-  item.style.top = y + 'px';
-  item.style.right = x + 'px';
+  imgObject.src = source;
+  this.context.drawImage(imgObject, position.x, position.y, size.w, size.h);
+  console.log(position.x);
+}
+GameView.prototype.drawText = function(text, fill, font, position){
+  this.context.font = font;
+  this.context.fillStyle = fill;
+  this.context.fillText(text, position.x, position.y);
 }
