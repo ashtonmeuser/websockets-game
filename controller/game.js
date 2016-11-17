@@ -128,7 +128,7 @@ Game.prototype.tick = function() {
 Game.prototype.acceleratePlayer = function(id, x, y) {
   var player = this.players[id];
   if(player != undefined && player.alive){
-    player.body.accelerate(Physics.vector(x, y).normalize().mult(player.body.acceleration));
+    player.body.accelerate(Physics.vector(x, y).clamp(Physics.vector(-1, -1), Physics.vector(1, 1)).mult(player.body.acceleration));
     player.body.sleep(false);
   }
 };
