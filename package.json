@@ -6,12 +6,14 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "mocha tests"
+    "test": "mocha tests",
+    "nodemon": "nodemon server.js"
   },
   "dependencies": {
+    "ejs": "^2.5.1",
     "express": "^4.12.3",
-    "socket.io": "^1.3.5",
-    "ejs": "^2.5.1"
+    "physicsjs": "^0.7.0",
+    "socket.io": "^1.3.5"
   },
   "repository": {
     "type": "git",

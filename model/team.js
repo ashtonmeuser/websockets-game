@@ -1,5 +1,3 @@
-var constants = require('../data/constants');
-
 // Constructor
 function Team(name, color) {
   this.name = name;
@@ -8,7 +6,7 @@ function Team(name, color) {
   this.color = color;
 }
 
-// Class methods
+// Instance methods
 Team.prototype.addPlayer = function() {
   this.length ++;
   this.nextName ++;
@@ -16,6 +14,8 @@ Team.prototype.addPlayer = function() {
 Team.prototype.removePlayer = function() {
   this.length --;
 }
+
+// Class methods
 
 // Export class
 module.exports = Team;
