@@ -6,7 +6,8 @@ function Obstacle(x, y) {
   this.color = new Color(128, 128, 128);
   this.body = Physics.body('obstacle-rectangle', {
     x: x,
-    y: y
+    y: y,
+    owner: this
   });
 }
 
@@ -14,7 +15,7 @@ function Obstacle(x, y) {
 Obstacle.prototype.toState = function() {
   return {
     'color': this.color.string(),
-    'position': {x: this.body.state.pos.x, y: this.body.state.pos.y},
+    'position': this.body.state.pos.values(),
     'size': {x: this.body.width, y: this.body.height}
   };
 }

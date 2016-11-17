@@ -5,9 +5,11 @@ var Physics = require('physicsjs');
 function Projectile(player, x, y) {
   this.activeColor = new Color(200, 130, 0);
   this.deactiveColor = new Color(128, 128, 128);
+  this.shooter = player;
   this.body = Physics.body('projectile', {
     x: player.body.state.pos.x,
-    y: player.body.state.pos.y
+    y: player.body.state.pos.y,
+    owner: this
   });
 }
 
@@ -15,11 +17,14 @@ function Projectile(player, x, y) {
 Projectile.prototype.accelerate = function(x, y) {
   this.body.accelerate(Physics.vector(x, y).vsub(this.body.state.pos).normalize().mult(1));
 };
+Projectile.prototype.delete = function() {
+  this.body._world.remove(this.body);
+};
 Projectile.prototype.toState = function() {
   return {
     color: (this.body.active) ? this.activeColor.string() : this.deactiveColor.string(),
     radius: this.body.radius,
-    position: {x: this.body.state.pos.x, y: this.body.state.pos.y}
+    position: this.body.state.pos.values()
   };
 };
 
@@ -33,7 +38,8 @@ Projectile.extension = function() {
           restitution: 0.6,
           maxSpeed: 1.5,
           active: false,
-          killSpeed: 0.3
+          killSpeed: 0.3,
+          newborn: true
         });
         parent.init.call(this, options);
       }

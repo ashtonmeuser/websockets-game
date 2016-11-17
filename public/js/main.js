@@ -22,6 +22,7 @@ window.onload = function() {
   });
 
   socket.on('state', function(state) {
+    window.s = state;
     game.updateState(state);
   });
 
