@@ -1,9 +1,7 @@
 var expect = require('chai').expect;
 var Game = require('../controller/game');
 var Player = require('../model/player');
-var StaticRectangle = require('../model/staticRectangle');
-var Vector = require('../model/vector');
-var constants = require('../data/constants');
+var Obstacle = require('../model/obstacle');
 
 describe('game', function(){
   it('should be initialized', function(){
@@ -51,23 +49,12 @@ describe('game', function(){
   });
 
   it('should return state', function(){
-    var color = constants.teamColors[0];
     var game = new Game();
-    game.addTeams(1);
     game.addPlayer('123');
 
-    var expected = {
-      'players': [{
-        'id': '123',
-        'name': 1,
-        'color': 'rgb('+color.r+','+color.g+','+color.b+')',
-        'position': new Vector(),
-        'radius': 20
-      }],
-      'obstacles': []
-    };
-
-    expect(game.state()).to.eql(expected);
+    expect(game.state().players[0]).to.have.all.keys(['id', 'name', 'color', 'position', 'radius', 'type']);
+    expect(game.state().obstacles.length).to.eql(game.obstacles.length);
+    expect(game.state().projectiles.length).to.eql(game.projectiles.length);
   });
 
   it('should tick', function(){

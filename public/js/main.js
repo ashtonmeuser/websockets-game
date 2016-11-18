@@ -1,6 +1,5 @@
 let key_code = {'left': 37, 'right': 39, 'up': 38, 'down': 40};
 var key_state = {'left': false, 'right': false, 'up': false, 'down': false};
-var socket = io();
 
 // Constructor
 const constants = {
@@ -32,59 +31,55 @@ const constants = {
 
 
 window.onload = function() {
+  var socket = io();
   var canvas = document.getElementById('canvas');
-  var game = new Game();
+  var game = new Game(socket);
   var gameView = new GameView(game, canvas, 'Intro');
   var mobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-  var body = document.getElementsByTagName("body")[0];
 
   socket.on('initialize', function(data) {
     gameView.bounds = data.bounds;
-    if(mobile){
+    if(mobile){ // Portrait
       canvas.width = gameView.bounds['y'];
       canvas.height = gameView.bounds['x'];
       canvas.getContext('2d').transform(0, 1, -1, 0, gameView.bounds['y'], 0);
-    }else{ // Laptop/desktop, landscape
+    }else{ // Landscape
       canvas.width = gameView.bounds['x'];
       canvas.height = gameView.bounds['y'];
     }
-    handleResizeCanvas(canvas);
-    // gameView.buildGraphics();
-  }, constants);
+    handleResizeCanvas(gameView);
+  });
 
   socket.on('state', function(state) {
+    window.s = state;
     game.updateState(state);
   });
 
   (function animate(){ // Recursive animation call
-    getUserInput();
+    getUserInput(game);
     gameView.update();
     requestAnimationFrame(animate);
   })();
 
   window.addEventListener('keydown', handleKeyDown, true);
   window.addEventListener('keyup', handleKeyUp, true);
-  window.addEventListener('resize', function(event){handleResizeCanvas(canvas);});
+  window.addEventListener('resize', function(event) {handleResizeCanvas(gameView);}, false);
   if(mobile){
-    canvas.addEventListener('touchstart', handleClick, false);
-    window.addEventListener('deviceorientation', handleAccelerometer, false);
+    canvas.addEventListener('touchstart', function(event) {handleClick(event, gameView, game);}, false);
+    window.addEventListener('deviceorientation', function(event) {handleAccelerometer(event, game);}, false);
   }else{
-    canvas.addEventListener('click', handleClick, true);
+    canvas.addEventListener('click', function(event) {handleClick(event, gameView, game);}, true);
   }
 };
 
-function getUserInput() {
+function getUserInput(game) {
   var x = 0;
   var y = 0;
   if(key_state.left) x -= 1;
   if(key_state.right) x += 1;
   if(key_state.up) y -= 1;
   if(key_state.down) y += 1;
-  updatePlayerAcceleration(x, y);
-}
-
-function updatePlayerAcceleration(x, y) {
-  if(x != 0 || y != 0) socket.emit('updatePlayerAcceleration', x, y);
+  game.updatePlayerAcceleration(x, y);
 }
 
 // Event handlers
@@ -126,25 +121,37 @@ function handleKeyUp(event) {
   }
 }
 
-function handleResizeCanvas(canvas) {
-  let ratio = canvas.width / canvas.height;
+function handleResizeCanvas(gameView) {
+  let ratio = gameView.canvas.width / gameView.canvas.height;
 
   if(document.body.clientHeight*ratio < document.body.clientWidth){
-    scale = canvas.height / document.body.clientHeight;
-    canvas.style.width = (100*ratio)+'vh';
-    canvas.style.height = (100)+'vh';
+    gameView.scale = gameView.canvas.height / document.body.clientHeight;
+    gameView.canvas.style.width = (100*ratio)+'vh';
+    gameView.canvas.style.height = (100)+'vh';
   }else{
-    scale = canvas.width / document.body.clientWidth;
-    canvas.style.width = (100)+'vw';
-    canvas.style.height= (100/ratio)+'vw';
+    gameView.scale = gameView.canvas.width / document.body.clientWidth;
+    gameView.canvas.style.width = (100)+'vw';
+    gameView.canvas.style.height= (100/ratio)+'vw';
   }
 }
 
-function handleClick(event) {
+function handleClick(event, gameView, game) {
+  var x = 0;
+  var y = 0;
+  if(event.type === 'touchstart'){
+    var tempX = (event.changedTouches[0].clientX-canvas.offsetLeft)*gameView.scale;
+    var tempY = (event.changedTouches[0].clientY-canvas.offsetTop)*gameView.scale;
+    x = tempY;
+    y = -tempX + gameView.bounds.y;
+  }else if(event.type === 'click'){
+    x = (event.clientX-canvas.offsetLeft)*gameView.scale;
+    y = (event.clientY-canvas.offsetTop)*gameView.scale;
+  }
+  game.addProjectile(x, y);
   event.preventDefault();
 }
 
-function handleAccelerometer(event) {
+function handleAccelerometer(event, game) {
   var x = 0;
   var y = 0;
   if(Math.abs(event.beta) > 2){
@@ -153,5 +160,5 @@ function handleAccelerometer(event) {
   if(Math.abs(event.gamma) > 2){
     y = -event.gamma/20;
   }
-  updatePlayerAcceleration(x, y);
+  game.updatePlayerAcceleration(x, y);
 }
