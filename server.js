@@ -31,15 +31,15 @@ socket.on('connection', function(socket){ // Listen for connections
   socket.emit('initialize', {
     bounds: {x: game.bounds.x, y: game.bounds.y}
   });
-  game.addPlayer(socket.id);
 
   socket.on('disconnect', function(){ // Listen for disconnections
     console.log('Disconnection ', socket.id);
     game.removePlayer(socket.id);
   });
 
-  socket.on('addPlayer', function(){
-    game.addPlayer(socket.id);
+  socket.on('addPlayer', function(avatar){
+    game.addPlayer(socket.id, avatar);
+    socket.emit('avatarChosen', avatar);
   });
 
   socket.on('updatePlayerAcceleration', function(x, y){

@@ -5,9 +5,23 @@ var key_state = {'left': false, 'right': false, 'up': false, 'down': false};
 const constants = {
   // Avatars
   'avatar': [ 'avatarStar.png',
-              'avatarYoshi.png'],
+              'avatarYoshi.png',
+              'avatarDarth.png',
+              'avatarDeadmau5.jpg',
+              'avatarMemeface.png',
+              'avatarSmiley.png',
+              'avatarFrown.png',
+              'avatarLaugh.jpg'],
   'avatarPos': [{'x':150, 'y':200},
-                {'x':200, 'y':200}],
+                {'x':200, 'y':200},
+                {'x':250, 'y':200},
+                {'x':300, 'y':200},
+                {'x':350, 'y':200},
+                {'x':400, 'y':200},
+                {'x':450, 'y':200},
+                {'x':500, 'y':200},
+                {'x':550, 'y':200},
+                {'x':600, 'y':200}],
   'avatarSize': {'w':40, 'h':40},
   // Buttons
   'button': ['blueButton.jpg'],
@@ -23,9 +37,9 @@ const constants = {
   'textFill': [ 'black',
                 'black',
                 'black'],
-  'textPos': [{'x':380, 'y':70},
-              {'x':380, 'y':150},
-              {'x':380, 'y':389}]
+  'textPos': [{'x':210, 'y':90},
+              {'x':295, 'y':180},
+              {'x':340, 'y':395}]
 };
 // var images = constants.avatars.map(function(avatar) {return new Image().source=avatar;});
 
@@ -48,11 +62,20 @@ window.onload = function() {
       canvas.height = gameView.bounds['y'];
     }
     handleResizeCanvas(gameView);
+    gameView.populateAvatars();
   });
 
   socket.on('state', function(state) {
     window.s = state;
     game.updateState(state);
+  });
+
+  socket.on('avatarChosen', function(avatar) {
+    gameView.avatarAvailable[avatar] = 0;
+  });
+
+  socket.on('avatarFreed', function(avatar) {
+    gameView.avatarAvailable[avatar] = 1;
   });
 
   (function animate(){ // Recursive animation call
@@ -65,10 +88,14 @@ window.onload = function() {
   window.addEventListener('keyup', handleKeyUp, true);
   window.addEventListener('resize', function(event) {handleResizeCanvas(gameView);}, false);
   if(mobile){
-    canvas.addEventListener('touchstart', function(event) {handleClick(event, gameView, game);}, false);
-    window.addEventListener('deviceorientation', function(event) {handleAccelerometer(event, game);}, false);
+    canvas.addEventListener('touchstart', handleGameClick, false);
+    window.addEventListener('deviceorientation', handleAccelerometer, false);
   }else{
-    canvas.addEventListener('click', function(event) {handleClick(event, gameView, game);}, true);
+    canvas.addEventListener('click', function(event){handleClick(event, gameView, game, socket);}, false);
+    // canvas.addEventListener('mousemove', function(event){
+    //   var mousePos=getMousePos(canvas, event);
+    // }, false);
+    // canvas.addEventListener('mouseover', )
   }
 };
 
@@ -85,26 +112,6 @@ function getUserInput(game) {
 // Event handlers
 function handleGameButtonPress(){
   this.style.boxShadow = '0 8px 16px 0 rgba(0,0,0,0.1), 0 6px 20px 0 rgba(0,0,0,0.1)';
-}
-
-// Remove the intro screen, raise transparency of game.
-function handleEnterGame(){
-
-  // Player has entered proper name and chosen icon.
-  if (1){
-    document.getElementById(gameView).gameTransparency = 1;
-    document.getElementById(gameView).page = 'Game';
-    // gameView.gameTransparency = 1;
-    // gameView.page = 'Game';
-
-    // Hide button and graphics.
-    for(var i = 0; i < constants.buttons.length; i++){
-      document.getElementById(constants.buttons[i]).style.visibility = 'hidden';
-    }
-    for(var i = 0; i < constants.avatars.length; i++){
-      document.getElementById(constants.avatars[i]).style.visibility = 'hidden';
-    }
-  }
 }
 
 function handleKeyDown(event) {
@@ -135,19 +142,37 @@ function handleResizeCanvas(gameView) {
   }
 }
 
-function handleClick(event, gameView, game) {
-  var x = 0;
-  var y = 0;
+function handleClick(event, gameView, game, socket) {
+  var mousePos = {x: 0, y:0};
+  var avatarSelection = -1;
   if(event.type === 'touchstart'){
     var tempX = (event.changedTouches[0].clientX-canvas.offsetLeft)*gameView.scale;
     var tempY = (event.changedTouches[0].clientY-canvas.offsetTop)*gameView.scale;
-    x = tempY;
-    y = -tempX + gameView.bounds.y;
+    mousePos.x = tempY;
+    mousePos.y = -tempX + gameView.bounds.y;
   }else if(event.type === 'click'){
-    x = (event.clientX-canvas.offsetLeft)*gameView.scale;
-    y = (event.clientY-canvas.offsetTop)*gameView.scale;
+    mousePos.x = (event.clientX-canvas.offsetLeft)*gameView.scale;
+    mousePos.y = (event.clientY-canvas.offsetTop)*gameView.scale;
   }
-  game.addProjectile(x, y);
+
+  // Detect item clicked.
+  // Enter game button.
+  if (mousePos.x > constants.buttonPos[0].x && mousePos.x < (constants.buttonPos[0].x + constants.buttonSize[0].w)
+    && mousePos.y > constants.buttonPos[0].y && mousePos.y < (constants.buttonPos[0].y + constants.buttonSize[0].h)){
+    gameView.page = 'Game';
+    socket.emit('addPlayer', gameView.avatarSelection);
+  }
+  // Avatar hit.
+  for (var i = 0; i < constants.avatar.length; i++){
+    if (mousePos.x > constants.avatarPos[i].x && mousePos.x < (constants.avatarPos[i].x + constants.avatarSize.w)
+      && mousePos.y > constants.avatarPos[i].y && mousePos.y < (constants.avatarPos[i].y + constants.avatarSize.h)){
+      avatarSelection = i;
+    }
+  }
+  if (avatarSelection >= 0){
+    gameView.avatarSelect(avatarSelection);
+  }
+  game.addProjectile(mousePos.x, mousePos.y);
   event.preventDefault();
 }
 
@@ -161,4 +186,12 @@ function handleAccelerometer(event, game) {
     y = -event.gamma/20;
   }
   game.updatePlayerAcceleration(x, y);
+}
+
+function getMousePos(canvas, event) {
+  var rect = canvas.getBoundingClientRect();
+  return {
+    x: Math.floor((event.clientX-rect.left)/(rect.right-rect.left)*canvas.width),
+    y: Math.floor((event.clientY-rect.top)/(rect.bottom-rect.top)*canvas.height) + 1
+  };
 }

@@ -69,10 +69,10 @@ Game.prototype.subscribers = function() {
     this.world.emit('collisions:desired', data);
   }.bind(this));
 }
-Game.prototype.addPlayer = function(id) {
+Game.prototype.addPlayer = function(id, avatar) {
   if(this.teams.length < 1) return;
   var smallestTeam = this.teams.sort(function(a, b) {return (a.length > b.length) ? 1 : -1;})[0];
-  var player = new Player(id, smallestTeam, 100, 100);
+  var player = new Player(id, smallestTeam, avatar, 100, 100);
 
   this.players[id] = player;
   this.world.add(player.body);

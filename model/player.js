@@ -2,7 +2,7 @@ var Team = require('./team');
 var Physics = require('physicsjs');
 
 // Constructor
-function Player(id, team, x, y) {
+function Player(id, team, avatar, x, y) {
   this.id = id;
   this.team = team;
   this.team.addPlayer();
@@ -15,6 +15,7 @@ function Player(id, team, x, y) {
     y: y,
     owner: this
   });
+  this.avatar = avatar;
 }
 
 // Instance methods
@@ -25,7 +26,8 @@ Player.prototype.toState = function() {
     name: this.name,
     type: this.body.type,
     radius: this.body.radius,
-    position: this.body.state.pos.values()
+    position: this.body.state.pos.values(),
+    avatar: this.avatar
   };
 }
 Player.prototype.delete = function() {
