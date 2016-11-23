@@ -8,7 +8,7 @@ function Color(r, g, b) {
 // Instance methods
 Color.prototype.string = function() {
   return 'rgb('+this.r+','+this.g+','+this.b+')';
-}
+};
 
 // Class methods
 

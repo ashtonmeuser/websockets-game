@@ -3,6 +3,7 @@ var Integrator = require('../model/integrator');
 var Team = require('../model/team');
 var Obstacle = require('../model/obstacle');
 var Projectile = require('../model/projectile');
+var Random = require('../model/random');
 var Physics = require('physicsjs');
 
 // Constructor
@@ -47,7 +48,7 @@ Game.prototype.behaviors = function() {
 };
 Game.prototype.integrators = function() {
   this.world.add(Physics.integrator('verlet-custom'));
-}
+};
 Game.prototype.subscribers = function() {
   this.world.on('collisions:detected', function(data){
     for(var i=0; i<data.collisions.length; i++){
@@ -59,7 +60,7 @@ Game.prototype.subscribers = function() {
         if(projectile.active){
           if(!projectile.newborn || projectile.owner.shooter !== player.owner)
             this.playerHit(player.owner, projectile.owner);
-        }else if(player.owner.ammo < player.owner.maxAmmo){
+        }else if(player.owner.alive && player.owner.ammo<player.owner.maxAmmo){
           data.collisions.splice(i, 1); // Do not record collision
           if(player.state.pos.dist(projectile.state.pos) < player.radius)
             this.ammoPickup(player.owner, projectile.owner);
@@ -68,11 +69,11 @@ Game.prototype.subscribers = function() {
     }
     this.world.emit('collisions:desired', data);
   }.bind(this));
-}
+};
 Game.prototype.addPlayer = function(id) {
   if(this.teams.length < 1) return;
   var smallestTeam = this.teams.sort(function(a, b) {return (a.length > b.length) ? 1 : -1;})[0];
-  var player = new Player(id, smallestTeam, 100, 100);
+  var player = new Player(id, smallestTeam);
 
   this.players[id] = player;
   this.world.add(player.body);
@@ -84,25 +85,43 @@ Game.prototype.removePlayer = function(id) {
 };
 Game.prototype.playerHit = function(player, projectile) {
   player.alive = false;
-  console.log('kill');
-}
+};
 Game.prototype.ammoPickup = function(player, projectile) {
   player.ammo++;
   projectile.delete();
   this.projectiles.splice(this.projectiles.indexOf(projectile), 1);
-}
+};
 Game.prototype.addTeams = function(names) {
   for(var index=0; index<names.length; index++){
     this.teams.push(new Team(names[index]));
   }
-}
+};
 Game.prototype.addObstacles = function(count) {
-  for(var index=0; index<count; index++){
-    var obstacle = new Obstacle(400, 225);
+  var positions = [
+    // Known vertical
+    {x: 130, y: 56.25, h: 112.5},
+    {x: 130, y: 393.75, h: 112.5},
+    {x: 670, y: 56.25, h: 112.5},
+    {x: 670, y: 393.75, h: 112.5},
+    // Known horizontal
+    {x: 137.5, y: 225, w: 275},
+    {x: 662.5, y: 225, w: 275},
+    // Random horizontal
+    {x: Random.randomBool() ? 332.5 : 467.5, y: [112.5, 225, 337.5][Random.rangedRandomInt(0, 2)], w: 155},
+    // Random vertical
+    {x: 265, y: Random.randomBool() ? 168.75 : 56.25, h: 112.5},
+    {x: 265, y: Random.randomBool() ? 281.25 : 393.75, h: 112.5},
+    {x: 400, y: Random.randomBool() ? 168.75 : 56.25, h: 112.5},
+    {x: 400, y: Random.randomBool() ? 281.25 : 393.75, h: 112.5},
+    {x: 535, y: Random.randomBool() ? 168.75 : 56.25, h: 112.5},
+    {x: 535, y: Random.randomBool() ? 281.25 : 393.75, h: 112.5}
+  ];
+  for(var i=0; i<positions.length; i++){
+    var obstacle = new Obstacle(positions[i].x, positions[i].y, positions[i].w||20, positions[i].h||20);
     this.obstacles.push(obstacle);
     this.world.add(obstacle.body);
   }
-}
+};
 Game.prototype.reset = function() {
   this.forEachPlayer(function(player) {this.removePlayer(player.id);}.bind(this));
 };
@@ -128,7 +147,7 @@ Game.prototype.tick = function() {
 Game.prototype.acceleratePlayer = function(id, x, y) {
   var player = this.players[id];
   if(player != undefined && player.alive){
-    player.body.accelerate(Physics.vector(x, y).normalize().mult(player.body.acceleration));
+    player.body.applyForce(Physics.vector(x, y).normalize().mult(player.acceleration*player.body.mass));
     player.body.sleep(false);
   }
 };
@@ -141,7 +160,7 @@ Game.prototype.addProjectile = function(id, x, y) {
     this.world.add(projectile.body);
     this.projectiles.push(projectile);
   }
-}
+};
 
 // Export class
 module.exports = Game;
