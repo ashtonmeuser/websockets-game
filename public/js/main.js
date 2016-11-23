@@ -6,7 +6,7 @@ window.onload = function() {
   var canvas = document.getElementById('canvas');
   var game = new Game(socket);
   var gameView = new GameView(game, canvas);
-  var mobile = ('ontouchstart' in window) || window.DocumentTouch && document instanceof DocumentTouch;
+  var mobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
   socket.on('initialize', function(data) {
     gameView.bounds = data.bounds;
