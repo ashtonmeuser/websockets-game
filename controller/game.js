@@ -97,25 +97,36 @@ Game.prototype.addTeams = function(names) {
   }
 };
 Game.prototype.addObstacles = function(count) {
+  var verticalObstacleMatrix = [
+    [Random.rangedRandomInt(0, 1), Random.rangedRandomInt(0, 1), Random.rangedRandomInt(0, 1)],
+    [Random.rangedRandomInt(2, 3), Random.rangedRandomInt(2, 3), Random.rangedRandomInt(2, 3)]
+  ];
+  var horizontalRow = Random.rangedRandomInt(0, 2);
+  var horizontalColumn = Random.rangedRandomInt(0, 1);
   var positions = [
     // Known vertical
     {x: 130, y: 56.25, h: 112.5},
-    {x: 130, y: 393.75, h: 112.5},
+    {x: 130, y: 56.25+112.5*3, h: 112.5},
     {x: 670, y: 56.25, h: 112.5},
-    {x: 670, y: 393.75, h: 112.5},
+    {x: 670, y: 56.25+112.5*3, h: 112.5},
     // Known horizontal
     {x: 137.5, y: 225, w: 275},
     {x: 662.5, y: 225, w: 275},
-    // Random horizontal
-    {x: Random.randomBool() ? 332.5 : 467.5, y: [112.5, 225, 337.5][Random.rangedRandomInt(0, 2)], w: 155},
-    // Random vertical
-    {x: 265, y: Random.randomBool() ? 168.75 : 56.25, h: 112.5},
-    {x: 265, y: Random.randomBool() ? 281.25 : 393.75, h: 112.5},
-    {x: 400, y: Random.randomBool() ? 168.75 : 56.25, h: 112.5},
-    {x: 400, y: Random.randomBool() ? 281.25 : 393.75, h: 112.5},
-    {x: 535, y: Random.randomBool() ? 168.75 : 56.25, h: 112.5},
-    {x: 535, y: Random.randomBool() ? 281.25 : 393.75, h: 112.5}
   ];
+
+  // Prevent closing in a corner
+  if(horizontalRow === 1 // Horizontal obstacle is vertically centered
+    || verticalObstacleMatrix[horizontalRow?1:0][horizontalColumn*2] !== (horizontalRow?2:1) // Horizontally exterior vertical obstacle is vertically interior
+    || verticalObstacleMatrix[horizontalRow?1:0][1] !== (horizontalRow?3:0)){ // Horizontally centered vertical obstacle is vertically exterior
+    positions.push({x: 332.5+135*horizontalColumn, y: 112.5*(horizontalRow+1), w: 155}); // Push horizontal obstacle position
+  }
+  // Push vertical obstacle positions
+  for(var i=0; i<verticalObstacleMatrix.length; i++){
+    for(var j=0; j<verticalObstacleMatrix[i].length; j++){
+      positions.push({x: 265+135*j, y: 56.25+112.5*verticalObstacleMatrix[i][j], h: 112.5});
+    }
+  }
+  // Add obstacles
   for(var i=0; i<positions.length; i++){
     var obstacle = new Obstacle(positions[i].x, positions[i].y, positions[i].w||20, positions[i].h||20);
     this.obstacles.push(obstacle);
