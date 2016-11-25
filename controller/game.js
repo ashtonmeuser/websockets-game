@@ -21,7 +21,7 @@ function Game() {
   this.obstacles = [];
   this.projectiles = [];
   // Setup game
-  this.addObstacles(1);
+  this.addObstacles();
   this.addTeams(['red', 'blue']);
 }
 
@@ -96,7 +96,7 @@ Game.prototype.addTeams = function(names) {
     this.teams.push(new Team(names[index]));
   }
 };
-Game.prototype.addObstacles = function(count) {
+Game.prototype.addObstacles = function() {
   var verticalObstacleMatrix = [
     [Random.rangedRandomInt(0, 1), Random.rangedRandomInt(0, 1), Random.rangedRandomInt(0, 1)],
     [Random.rangedRandomInt(2, 3), Random.rangedRandomInt(2, 3), Random.rangedRandomInt(2, 3)]
@@ -157,19 +157,18 @@ Game.prototype.tick = function() {
 };
 Game.prototype.acceleratePlayer = function(id, x, y) {
   var player = this.players[id];
-  if(player != undefined && player.alive){
-    player.body.applyForce(Physics.vector(x, y).clamp(Physics.vector(-1, -1), Physics.vector(1, 1)).mult(player.acceleration*player.body.mass));
-    player.body.sleep(false);
+  if(player !== undefined){
+    player.accelerate(x, y);
   }
 };
 Game.prototype.addProjectile = function(id, x, y) {
   var player = this.players[id];
-  if(player != undefined && player.alive && player.ammo>0){
-    player.ammo--;
-    var projectile = new Projectile(this.players[id]);
-    projectile.accelerate(x, y);
-    this.world.add(projectile.body);
-    this.projectiles.push(projectile);
+  if(player !== undefined){
+    var projectile = player.addProjectile(x, y);
+    if(projectile !== undefined){
+      this.world.add(projectile.body);
+      this.projectiles.push(projectile);
+    }
   }
 };
 
