@@ -7,6 +7,7 @@ function Team(name) {
   this.nextName = 0;
   this.aliveColor = this.getColor(name).alive;
   this.deadColor = this.getColor(name).dead;
+  this.coordinates = this.getCoordinates(name);
 }
 
 // Instance methods
@@ -25,6 +26,15 @@ Team.prototype.getColor = function(name) {
     purple: {alive: new Color(170, 110, 200), dead: new Color(200, 170, 200)}
   };
   return colors[name];
+}
+Team.prototype.getCoordinates = function(name) {
+  var coordinates = {
+    red: {x: 60, y: 390},
+    blue: {x: 740, y: 60},
+    green: {x: 60, y: 60},
+    purple: {x: 740, y: 390}
+  };
+  return coordinates[name];
 }
 
 // Class methods

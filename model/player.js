@@ -1,18 +1,21 @@
 var Team = require('./team');
+var Projectile = require('./projectile');
+var Random = require('./random');
 var Physics = require('physicsjs');
 
 // Constructor
-function Player(id, team, x, y) {
+function Player(id, team) {
   this.id = id;
   this.team = team;
   this.team.addPlayer();
   this.name = this.team.nextName;
   this.ammo = 3;
   this.maxAmmo = 5;
+  this.acceleration = 0.005;
   this.alive = true;
   this.body = Physics.body('player', {
-    x: x,
-    y: y,
+    x: this.team.coordinates.x + Random.rangedRandomFloat(-40, 40),
+    y: this.team.coordinates.y + Random.rangedRandomFloat(-40, 40),
     owner: this
   });
 }
@@ -32,8 +35,19 @@ Player.prototype.delete = function() {
   this.team.removePlayer();
   this.body._world.remove(this.body);
 }
-Player.prototype.createBody = function() {
-  this.team.removePlayer();
+Player.prototype.addProjectile = function(x, y) {
+  if(this.ammo>0 && this.alive){
+    this.ammo--;
+    var projectile = new Projectile(this);
+    projectile.accelerate(x, y);
+    return projectile;
+  }
+}
+Player.prototype.accelerate = function(x, y) {
+  if(this.alive){
+    this.body.applyForce(Physics.vector(x, y).clamp(Physics.vector(-1, -1), Physics.vector(1, 1)).mult(this.acceleration*this.body.mass));
+    this.body.sleep(false);
+  }
 }
 
 // Class methods
@@ -44,7 +58,6 @@ Player.extension = function() {
         Physics.util.extend(options, {
           radius: 20,
           restitution: 0.2,
-          acceleration: 0.005,
           maxSpeed: 0.2,
           mass: 10
         });

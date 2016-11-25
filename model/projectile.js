@@ -16,6 +16,7 @@ function Projectile(player, x, y) {
 // Instance methods
 Projectile.prototype.accelerate = function(x, y) {
   this.body.accelerate(Physics.vector(x, y).vsub(this.body.state.pos).normalize().mult(1));
+  this.body.sleep(false);
 };
 Projectile.prototype.delete = function() {
   this.body._world.remove(this.body);
