@@ -10,6 +10,7 @@ window.onload = function() {
 
   socket.on('initialize', function(data) {
     gameView.bounds = data.bounds;
+    canvas.style.display = 'block';
     if(mobile){ // Portrait
       canvas.width = gameView.bounds['y'];
       canvas.height = gameView.bounds['x'];
@@ -22,7 +23,7 @@ window.onload = function() {
   });
 
   socket.on('state', function(state) {
-    window.s = state;
+    window.s = state; // DEBUG
     game.updateState(state);
   });
 
@@ -54,7 +55,6 @@ function getUserInput(game) {
 }
 
 // Event handlers
-
 function handleKeyDown(event) {
   for(var direction in key_code){
     if(event.keyCode === key_code[direction])

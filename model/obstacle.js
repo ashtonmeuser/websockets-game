@@ -16,11 +16,11 @@ function Obstacle(x, y, width, height) {
 // Instance methods
 Obstacle.prototype.toState = function() {
   return {
-    'color': this.color.string(),
-    'position': this.body.state.pos.values(),
-    'size': {x: this.body.width, y: this.body.height}
+    color: this.color.string(),
+    position: this.body.state.pos.values(),
+    size: {x: this.body.width, y: this.body.height}
   };
-}
+};
 
 // Class methods
 Obstacle.extension = function() {
@@ -36,7 +36,7 @@ Obstacle.extension = function() {
       }
     }
   });
-}
+};
 
 // Export class
 module.exports = Obstacle;

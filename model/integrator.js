@@ -36,7 +36,7 @@ Integrator.extension = function() {
       }
     };
   });
-}
+};
 
 // Export class
 module.exports = Integrator;
