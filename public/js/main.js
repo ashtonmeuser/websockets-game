@@ -9,6 +9,7 @@ window.onload = function() {
   var mobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
   socket.on('initialize', function(data) {
+    game.id = data.id;
     gameView.bounds = data.bounds;
     canvas.style.display = 'block';
     if(mobile){ // Portrait

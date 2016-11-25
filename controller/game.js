@@ -44,6 +44,7 @@ Game.prototype.setPhase = function() {
         break;
     }
   }
+  this.phaseTime.timeout = new Date().getTime() + this.phaseTime[this.phase];
   setTimeout(this.setPhase.bind(this), this.phaseTime[this.phase]);
 }
 Game.prototype.addPlayer = function(id) {
@@ -67,7 +68,7 @@ Game.prototype.ammoPickup = function(player, projectile) {
 };
 Game.prototype.addAmmo = function(count) {
   for(var i=0; i<count; i++){
-    this.addProjectile(Random.rangedRandomFloat(10, this.bounds.x-10), Random.rangedRandomFloat(10, this.bounds.y-10));
+    this.addProjectile(Random.rangedRandomFloat(140, this.bounds.x-140), Random.rangedRandomFloat(140, this.bounds.y-140));
   }
 };
 Game.prototype.addTeams = function(names) {
@@ -117,20 +118,24 @@ Game.prototype.addObstacles = function() {
 Game.prototype.reset = function() {
   this.player.forEach(function(player) {this.removePlayer(player.id);}.bind(this));
 };
-Game.prototype.state = function(callback) {
+Game.prototype.state = function() {
   return {
     phase: this.phase,
+    timeout: Math.ceil((this.phaseTime.timeout-new Date().getTime())/1000),
     players: this.players.map(function(player) {return player.toState();}),
     obstacles: this.obstacles.map(function(obstacle) {return obstacle.toState();}),
     projectiles: this.projectiles.map(function(projectile) {return projectile.toState();})
   };
 };
 Game.prototype.getPlayer = function(id) {
-  return this.players.filter(function(player) {
+  var matches = this.players.filter(function(player) {
     return player.id == id;
-  })[0];
+  });
+  if(matches.length > 0)
+    return matches[0];
 };
 Game.prototype.acceleratePlayer = function(id, x, y) {
+  if(this.phase !== 'play') return;
   var player = this.getPlayer(id);
   if(player !== undefined){
     player.accelerate(x, y);
@@ -142,6 +147,7 @@ Game.prototype.addProjectile = function(x, y) {
   this.projectiles.push(projectile);
 };
 Game.prototype.shootProjectile = function(id, x, y) {
+  if(this.phase !== 'play') return;
   var player = this.getPlayer(id);
   if(player !== undefined){
     var projectile = player.shootProjectile(x, y);

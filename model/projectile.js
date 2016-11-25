@@ -7,10 +7,11 @@ function Projectile(player, x, y) {
   this.deactiveColor = new Color(128, 128, 128);
   this.shooter = player;
   this.body = Physics.body('projectile', {
-    x: x||player.body.state.pos.x,
-    y: y||player.body.state.pos.y,
+    x: x || player.body.state.pos.x,
+    y: y || player.body.state.pos.y,
     owner: this
   });
+  this.body.sleep(false);
 }
 
 // Instance methods
@@ -36,8 +37,8 @@ Projectile.extension = function() {
       init: function(options) {
         Physics.util.extend(options, {
           radius: 10,
-          restitution: 0.6,
-          maxSpeed: 1.5,
+          restitution: 0.8,
+          maxSpeed: 1.0,
           active: false,
           killSpeed: 0.3,
           newborn: true

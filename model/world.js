@@ -42,7 +42,7 @@ World.prototype.subscribers = function() {
   this.world.on('collisions:detected', function(data){
     for(var i=0; i<data.collisions.length; i++){
       var collision = data.collisions[i];
-      if(collision.bodyA.name === 'projectile' && collision.bodyB.name === 'player' || collision.bodyA.name === 'player' && collision.bodyB.name === 'projectile'){
+      if(collision.bodyA.name==='projectile' && collision.bodyB.name==='player' || collision.bodyA.name==='player' && collision.bodyB.name==='projectile'){
         var player = (collision.bodyA.name === 'player') ? collision.bodyA : collision.bodyB;
         var projectile = (collision.bodyA.name === 'projectile') ? collision.bodyA : collision.bodyB;
 

@@ -29,6 +29,7 @@ setInterval(function() {
 socket.on('connection', function(socket){ // Listen for connections
   console.log('Connection ', socket.id); // DEBUG
   socket.emit('initialize', {
+    id: socket.id,
     bounds: game.bounds
   });
   game.addPlayer(socket.id);

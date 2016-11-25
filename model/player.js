@@ -18,15 +18,16 @@ function Player(id, team) {
     y: this.team.coordinates.y + Random.rangedRandomFloat(-40, 40),
     owner: this
   });
+  this.body.sleep(false);
 }
 
 // Instance methods
 Player.prototype.toState = function() {
   return {
     id: this.id,
+    ammo: this.ammo,
     color: (this.alive) ? this.team.aliveColor.string() : this.team.deadColor.string(),
     name: this.name,
-    type: this.body.type,
     radius: this.body.radius,
     position: this.body.state.pos.values()
   };
