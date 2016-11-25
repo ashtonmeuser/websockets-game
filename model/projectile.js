@@ -7,8 +7,8 @@ function Projectile(player, x, y) {
   this.deactiveColor = new Color(128, 128, 128);
   this.shooter = player;
   this.body = Physics.body('projectile', {
-    x: player.body.state.pos.x,
-    y: player.body.state.pos.y,
+    x: x||player.body.state.pos.x,
+    y: y||player.body.state.pos.y,
     owner: this
   });
 }

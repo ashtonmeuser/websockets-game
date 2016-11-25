@@ -1,5 +1,6 @@
 var Player = require('../model/player');
 var Team = require('../model/team');
+var Projectile = require('../model/projectile');
 var Obstacle = require('../model/obstacle');
 var Random = require('../model/random');
 var World = require('../model/world');
@@ -14,7 +15,7 @@ function Game() {
   this.teams = [];
   this.obstacles = [];
   this.projectiles = [];
-  this.time = {
+  this.phaseTime = {
     queue: 15000,
     play: 120000,
     results: 15000
@@ -22,6 +23,7 @@ function Game() {
   // Setup game
   this.setPhase();
   this.addObstacles();
+  this.addAmmo(10);
   this.addTeams(['red', 'blue']);
 }
 
@@ -42,7 +44,7 @@ Game.prototype.setPhase = function() {
         break;
     }
   }
-  setTimeout(this.setPhase.bind(this), this.time[this.phase]);
+  setTimeout(this.setPhase.bind(this), this.phaseTime[this.phase]);
 }
 Game.prototype.addPlayer = function(id) {
   if(this.teams.length < 1) return;
@@ -62,6 +64,11 @@ Game.prototype.removePlayer = function(id) {
 Game.prototype.ammoPickup = function(player, projectile) {
   player.ammoPickup(projectile);
   this.projectiles.splice(this.projectiles.indexOf(projectile), 1);
+};
+Game.prototype.addAmmo = function(count) {
+  for(var i=0; i<count; i++){
+    this.addProjectile(Random.rangedRandomFloat(10, this.bounds.x-10), Random.rangedRandomFloat(10, this.bounds.y-10));
+  }
 };
 Game.prototype.addTeams = function(names) {
   for(var index=0; index<names.length; index++){
@@ -129,10 +136,15 @@ Game.prototype.acceleratePlayer = function(id, x, y) {
     player.accelerate(x, y);
   }
 };
-Game.prototype.addProjectile = function(id, x, y) {
+Game.prototype.addProjectile = function(x, y) {
+  var projectile = new Projectile(null, x, y);
+  this.world.add(projectile);
+  this.projectiles.push(projectile);
+};
+Game.prototype.shootProjectile = function(id, x, y) {
   var player = this.getPlayer(id);
   if(player !== undefined){
-    var projectile = player.addProjectile(x, y);
+    var projectile = player.shootProjectile(x, y);
     if(projectile !== undefined){
       this.world.add(projectile);
       this.projectiles.push(projectile);

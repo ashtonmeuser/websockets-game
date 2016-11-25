@@ -35,7 +35,7 @@ Player.prototype.delete = function() {
   this.team.removePlayer();
   this.body._world.remove(this.body);
 };
-Player.prototype.addProjectile = function(x, y) {
+Player.prototype.shootProjectile = function(x, y) {
   if(this.ammo>0 && this.alive){
     this.ammo--;
     var projectile = new Projectile(this);

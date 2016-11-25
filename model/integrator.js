@@ -23,7 +23,7 @@ Integrator.extension = function() {
               body.state.angular.vel = 0;
               body.state.vel.mult(1-this.options.playerDrag/dt);
             }else if(body.name === 'projectile'){
-              if(body.newborn && body.state.pos.dist(body.owner.shooter.body.state.pos)>body.owner.shooter.body.radius)
+              if(body.newborn && (body.owner.shooter === null || body.state.pos.dist(body.owner.shooter.body.state.pos)>body.owner.shooter.body.radius))
                 body.newborn = false;
               body.active = (body.state.vel.norm()>body.killSpeed);
             }else{

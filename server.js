@@ -46,7 +46,7 @@ socket.on('connection', function(socket){ // Listen for connections
     game.acceleratePlayer(socket.id, x, y);
   });
 
-  socket.on('addProjectile', function(x, y){
-    game.addProjectile(socket.id, x, y);
+  socket.on('shootProjectile', function(x, y){
+    game.shootProjectile(socket.id, x, y);
   });
 });

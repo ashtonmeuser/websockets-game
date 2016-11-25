@@ -95,7 +95,7 @@ function handleClick(event, gameView, game) {
     x = (event.clientX-canvas.offsetLeft)*gameView.scale;
     y = (event.clientY-canvas.offsetTop)*gameView.scale;
   }
-  game.addProjectile(x, y);
+  game.shootProjectile(x, y);
   event.preventDefault();
 }
 
