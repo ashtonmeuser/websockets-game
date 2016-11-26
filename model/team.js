@@ -14,10 +14,10 @@ function Team(name) {
 Team.prototype.addPlayer = function() {
   this.length++;
   this.nextName++;
-}
+};
 Team.prototype.removePlayer = function() {
   this.length--;
-}
+};
 Team.prototype.getColor = function(name) {
   var colors = {
     red: {alive: new Color(220, 70, 110), dead: new Color(220, 160, 170)},
@@ -26,7 +26,7 @@ Team.prototype.getColor = function(name) {
     purple: {alive: new Color(170, 110, 200), dead: new Color(200, 170, 200)}
   };
   return colors[name];
-}
+};
 Team.prototype.getCoordinates = function(name) {
   var coordinates = {
     red: {x: 60, y: 390},
@@ -35,7 +35,7 @@ Team.prototype.getCoordinates = function(name) {
     purple: {x: 740, y: 390}
   };
   return coordinates[name];
-}
+};
 
 // Class methods
 

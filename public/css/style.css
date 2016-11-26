@@ -12,4 +12,5 @@ body {
 }
 #canvas {
   background-color: #FFF;
+  display: none;
 }

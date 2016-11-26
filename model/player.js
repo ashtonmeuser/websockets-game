@@ -18,37 +18,46 @@ function Player(id, team) {
     y: this.team.coordinates.y + Random.rangedRandomFloat(-40, 40),
     owner: this
   });
+  this.body.sleep(false);
 }
 
 // Instance methods
 Player.prototype.toState = function() {
   return {
     id: this.id,
+    ammo: this.ammo,
     color: (this.alive) ? this.team.aliveColor.string() : this.team.deadColor.string(),
     name: this.name,
-    type: this.body.type,
     radius: this.body.radius,
     position: this.body.state.pos.values()
   };
-}
+};
 Player.prototype.delete = function() {
   this.team.removePlayer();
   this.body._world.remove(this.body);
-}
-Player.prototype.addProjectile = function(x, y) {
+};
+Player.prototype.shootProjectile = function(x, y) {
   if(this.ammo>0 && this.alive){
     this.ammo--;
     var projectile = new Projectile(this);
     projectile.accelerate(x, y);
     return projectile;
   }
-}
+};
 Player.prototype.accelerate = function(x, y) {
   if(this.alive){
     this.body.applyForce(Physics.vector(x, y).clamp(Physics.vector(-1, -1), Physics.vector(1, 1)).mult(this.acceleration*this.body.mass));
     this.body.sleep(false);
   }
-}
+};
+Player.prototype.hit = function(projectile) {
+  this.alive = false;
+  this.team.removePlayer();
+};
+Player.prototype.ammoPickup = function(projectile) {
+  this.ammo++;
+  projectile.delete();
+};
 
 // Class methods
 Player.extension = function() {
@@ -65,7 +74,7 @@ Player.extension = function() {
       }
     }
   });
-}
+};
 
 // Export class
 module.exports = Player;

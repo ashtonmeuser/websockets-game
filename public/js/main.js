@@ -9,7 +9,9 @@ window.onload = function() {
   var mobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
   socket.on('initialize', function(data) {
+    game.id = data.id;
     gameView.bounds = data.bounds;
+    canvas.style.display = 'block';
     if(mobile){ // Portrait
       canvas.width = gameView.bounds['y'];
       canvas.height = gameView.bounds['x'];
@@ -22,7 +24,8 @@ window.onload = function() {
   });
 
   socket.on('state', function(state) {
-    window.s = state;
+    window.s = state; // DEBUG
+    window.g = game; // DEBUG
     game.updateState(state);
   });
 
@@ -54,7 +57,6 @@ function getUserInput(game) {
 }
 
 // Event handlers
-
 function handleKeyDown(event) {
   for(var direction in key_code){
     if(event.keyCode === key_code[direction])
@@ -95,7 +97,7 @@ function handleClick(event, gameView, game) {
     x = (event.clientX-canvas.offsetLeft)*gameView.scale;
     y = (event.clientY-canvas.offsetTop)*gameView.scale;
   }
-  game.addProjectile(x, y);
+  game.shootProjectile(x, y);
   event.preventDefault();
 }
 
