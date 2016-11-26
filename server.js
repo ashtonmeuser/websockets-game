@@ -32,6 +32,7 @@ socket.on('connection', function(socket){ // Listen for connections
     id: socket.id,
     bounds: game.bounds
   });
+  game.addId(socket.id); // DEBUG
 
   socket.on('disconnect', function(){ // Listen for disconnections
     console.log('Disconnection ', socket.id); // DEBUG
