@@ -21,6 +21,9 @@ Obstacle.prototype.toState = function() {
     size: {x: this.body.width, y: this.body.height}
   };
 };
+Obstacle.prototype.delete = function() {
+  this.body._world.remove(this.body);
+};
 
 // Class methods
 Obstacle.extension = function() {

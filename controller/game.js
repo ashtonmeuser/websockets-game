@@ -11,6 +11,7 @@ function Game() {
   this.bounds = {x: 800, y: 450};
   this.world = new World(this);
   // Empty state
+  this.queue = [];
   this.players = [];
   this.teams = [];
   this.obstacles = [];
@@ -21,32 +22,40 @@ function Game() {
     results: 15000
   };
   // Setup game
-  this.setPhase();
-  this.addObstacles();
-  this.addAmmo(10);
-  this.addTeams(['red', 'blue']);
+  this.setPhase('queue');
 }
 
 // Instance methods
-Game.prototype.setPhase = function() {
-  if(this.phase === undefined){
-    this.phase = 'queue';
+Game.prototype.setPhase = function(phase) {
+  if(phase !== undefined){
+    this.phase = phase;
+    clearTimeout(this.phaseTime.timeout);
   }else{
-    switch(this.phase) {
-      case 'queue':
-        this.phase = 'play';
-        break;
-      case 'play':
-        this.phase = 'results';
-        break;
-      case 'results':
-        this.phase = 'queue';
-        break;
-    }
+    if(this.phase==='queue' && this.aliveTeams().length <= 1) return;
+    this.phase = this.nextPhase(this.phase);
   }
-  this.phaseTime.timeout = new Date().getTime() + this.phaseTime[this.phase];
-  setTimeout(this.setPhase.bind(this), this.phaseTime[this.phase]);
-}
+  switch(this.phase) {
+    case 'queue':
+      this.reset();
+      this.phaseTime.nextGame = new Date().getTime() + this.phaseTime.queue;
+      break;
+    case 'play':
+      this.phaseTime.nextGame = new Date().getTime() + this.phaseTime.play + this.phaseTime.results + this.phaseTime.queue;
+      break;
+    case 'results':
+      this.phaseTime.nextGame = new Date().getTime() + this.phaseTime.results + this.phaseTime.queue;
+      break;
+  }
+  this.phaseTime.nextPhase = new Date().getTime() + this.phaseTime[this.phase];
+  this.phaseTime.timeout = setTimeout(this.setPhase.bind(this), this.phaseTime[this.phase]);
+};
+Game.prototype.nextPhase = function(phase) {
+  switch(phase) {
+    case 'queue': return 'play';
+    case 'play': return 'results';
+    case 'results': return 'queue';
+  }
+};
 Game.prototype.addPlayer = function(id) {
   if(this.teams.length < 1) return;
   var smallestTeam = this.teams.sort(function(a, b) {return (a.length > b.length) ? 1 : -1;})[0];
@@ -54,17 +63,32 @@ Game.prototype.addPlayer = function(id) {
 
   this.players.push(player);
   this.world.add(player);
+
+  if(this.phaseTime.nextGame<new Date().getTime() && this.aliveTeams().length>1){
+    this.setPhase('play');
+  }
 };
-Game.prototype.removePlayer = function(id) {
+Game.prototype.addId = function(id) {
+  if(this.phase === 'queue'){
+    this.addPlayer(id);
+  }else{
+    this.queue.push(id);
+  }
+};
+Game.prototype.removeId = function(id) {
   var player = this.getPlayer(id);
   if(player !== undefined){
     player.delete();
-    this.players.splice(this.players.indexOf(player), 1);
+    var index = this.players.indexOf(player);
+    if(index >= 0) this.players.splice(index, 1);
   }
+  var index = this.queue.indexOf(id);
+  if(index >= 0) this.queue.splice(index, 1);
 };
 Game.prototype.ammoPickup = function(player, projectile) {
   player.ammoPickup(projectile);
-  this.projectiles.splice(this.projectiles.indexOf(projectile), 1);
+  var index = this.projectiles.indexOf(projectile);
+  if(index >= 0) this.projectiles.splice(index, 1);
 };
 Game.prototype.addAmmo = function(count) {
   for(var i=0; i<count; i++){
@@ -115,17 +139,53 @@ Game.prototype.addObstacles = function() {
     this.world.add(obstacle);
   }.bind(this));
 };
+Game.prototype.step = function() {
+  this.checkEndgame();
+  this.world.step();
+};
 Game.prototype.reset = function() {
-  this.player.forEach(function(player) {this.removePlayer(player.id);}.bind(this));
+  this.players.forEach(function(player) {
+    this.queue.push(player.id);
+    player.delete();
+  }.bind(this));
+  this.projectiles.forEach(function(projectile) {projectile.delete();});
+  this.obstacles.forEach(function(obstacle) {obstacle.delete();});
+  this.players.length = 0;
+  this.teams.length = 0;
+  this.projectiles.length = 0;
+  this.obstacles.length = 0;
+  this.addObstacles();
+  this.addAmmo(10);
+  this.addTeams(['red', 'blue']);
+
+  this.queue.forEach(function(id) {
+    this.addPlayer(id);
+  }.bind(this));
+  this.queue.length = 0;
 };
 Game.prototype.state = function() {
   return {
     phase: this.phase,
-    timeout: Math.ceil((this.phaseTime.timeout-new Date().getTime())/1000),
+    queue: this.queue,
+    nextPhase: Math.ceil((this.phaseTime.nextPhase-new Date().getTime())/1000),
+    nextGame: Math.ceil((this.phaseTime.nextGame-new Date().getTime())/1000),
     players: this.players.map(function(player) {return player.toState();}),
     obstacles: this.obstacles.map(function(obstacle) {return obstacle.toState();}),
     projectiles: this.projectiles.map(function(projectile) {return projectile.toState();})
   };
+};
+Game.prototype.checkEndgame = function() {
+  if(this.phase !== 'play') return;
+  var aliveTeams = this.aliveTeams();
+  if(aliveTeams.length <= 1){
+    console.log(aliveTeams[0].name+' team won');
+    this.setPhase('results');
+  }
+};
+Game.prototype.aliveTeams = function() {
+  return this.teams.filter(function(team) {
+    return team.length > 0;
+  });
 };
 Game.prototype.getPlayer = function(id) {
   var matches = this.players.filter(function(player) {
@@ -135,7 +195,7 @@ Game.prototype.getPlayer = function(id) {
     return matches[0];
 };
 Game.prototype.acceleratePlayer = function(id, x, y) {
-  if(this.phase !== 'play') return;
+  if(this.phase!=='play' && this.phase!=='results') return;
   var player = this.getPlayer(id);
   if(player !== undefined){
     player.accelerate(x, y);

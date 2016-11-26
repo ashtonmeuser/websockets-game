@@ -25,6 +25,7 @@ window.onload = function() {
 
   socket.on('state', function(state) {
     window.s = state; // DEBUG
+    window.g = game; // DEBUG
     game.updateState(state);
   });
 

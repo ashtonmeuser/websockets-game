@@ -19,7 +19,7 @@ server.listen(app.get('port'), function(){
 });
 
 setInterval(function() {
-  game.world.step();
+  game.step();
 }, 1000/160);
 
 setInterval(function() {
@@ -32,15 +32,14 @@ socket.on('connection', function(socket){ // Listen for connections
     id: socket.id,
     bounds: game.bounds
   });
-  game.addPlayer(socket.id);
 
   socket.on('disconnect', function(){ // Listen for disconnections
     console.log('Disconnection ', socket.id); // DEBUG
-    game.removePlayer(socket.id);
+    game.removeId(socket.id);
   });
 
   socket.on('addPlayer', function(){
-    game.addPlayer(socket.id);
+    game.addId(socket.id);
   });
 
   socket.on('updatePlayerAcceleration', function(x, y){

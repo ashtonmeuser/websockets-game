@@ -13,14 +13,21 @@ GameView.prototype.update = function() {
   this.drawProjectiles();
   this.drawObstacles();
   switch(this.game.state.phase) {
+    case 'join':
+      this.drawTextScreen(0.5);
+      this.drawLabel({x:200, y:200}, 'join', 'black');
+      break;
     case 'queue':
       this.drawTextScreen(0.5);
+      var time = (this.game.state.nextGame < 0) ? 'waiting for players' : this.game.state.nextGame;
+      this.drawLabel({x:200, y:200}, 'queue'+time, 'black');
       break;
     case 'play':
-      this.drawHud(0.5, this.game.state.ammo, this.game.state.timeout);
+      this.drawHud(0.5, this.game.state.ammo, this.game.state.nextPhase);
       break;
     case 'results':
       this.drawTextScreen(0.5);
+      this.drawLabel({x:200, y:200}, 'results'+this.game.state.nextPhase, 'black');
       break;
   }
 };
@@ -70,6 +77,7 @@ GameView.prototype.drawHud = function(alpha, ammo, timeout) {
   this.drawLabel({x:35, y:45}, timeout, 'rgba(0, 0, 0, '+alpha+')', 'left', 20);
 };
 GameView.prototype.drawTextScreen = function(alpha) {
+  if(!this.bounds) return;
   this.context.fillStyle = 'rgba(255, 255, 255, '+alpha+')';
   this.context.fillRect(0, 0, this.bounds.x, this.bounds.y);
 };
