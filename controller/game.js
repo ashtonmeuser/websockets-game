@@ -17,9 +17,9 @@ function Game() {
   this.obstacles = [];
   this.projectiles = [];
   this.phaseTime = {
-    queue: 15000,
-    play: 120000,
-    results: 15000
+    queue: 10000,
+    play: 60000,
+    results: 10000
   };
   // Setup game
   this.setPhase('queue');
@@ -178,7 +178,7 @@ Game.prototype.checkEndgame = function() {
   if(this.phase !== 'play') return;
   var aliveTeams = this.aliveTeams();
   if(aliveTeams.length <= 1){
-    console.log(aliveTeams[0].name+' team won');
+    console.log(aliveTeams[0].name+' team won'); // DEBUG
     this.setPhase('results');
   }
 };
