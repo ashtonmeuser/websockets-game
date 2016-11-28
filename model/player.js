@@ -51,8 +51,10 @@ Player.prototype.accelerate = function(x, y) {
   }
 };
 Player.prototype.hit = function(projectile) {
-  this.alive = false;
-  this.team.removePlayer();
+  if(this.alive){
+    this.alive = false;
+    this.team.removePlayer();
+  }
 };
 Player.prototype.ammoPickup = function(projectile) {
   this.ammo++;

@@ -1,4 +1,4 @@
-let key_code = {'left': 37, 'right': 39, 'up': 38, 'down': 40};
+let key_code = {'left': [37, 65], 'right': [39, 68], 'up': [38, 87], 'down': [40, 83]};
 var key_state = {'left': false, 'right': false, 'up': false, 'down': false};
 
 window.onload = function() {
@@ -59,14 +59,14 @@ function getUserInput(game) {
 // Event handlers
 function handleKeyDown(event) {
   for(var direction in key_code){
-    if(event.keyCode === key_code[direction])
+    if(key_code[direction].indexOf(event.keyCode) >= 0)
       key_state[direction] = true;
   }
 }
 
 function handleKeyUp(event) {
   for(var direction in key_code){
-    if(event.keyCode === key_code[direction])
+    if(key_code[direction].indexOf(event.keyCode) >= 0)
       key_state[direction] = false;
   }
 }
