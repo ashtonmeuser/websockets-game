@@ -10,7 +10,7 @@ Integrator.extension = function() {
   Physics.integrator('verlet-custom', 'verlet', function(parent){
     return {
       init: function(options) {
-        options.drag = 0.005;
+        options.drag = 0.004;
         options.playerDrag = 0.1;
         parent.init.call(this, options);
       },
@@ -23,7 +23,7 @@ Integrator.extension = function() {
               body.state.angular.vel = 0;
               body.state.vel.mult(1-this.options.playerDrag/dt);
             }else if(body.name === 'projectile'){
-              if(body.newborn && body.state.pos.dist(body.owner.shooter.body.state.pos)>body.owner.shooter.body.radius)
+              if(body.newborn && (body.owner.shooter===null || body.state.pos.dist(body.owner.shooter.body.state.pos)>body.owner.shooter.body.radius+body.radius*2))
                 body.newborn = false;
               body.active = (body.state.vel.norm()>body.killSpeed);
             }else{
@@ -36,7 +36,7 @@ Integrator.extension = function() {
       }
     };
   });
-}
+};
 
 // Export class
 module.exports = Integrator;

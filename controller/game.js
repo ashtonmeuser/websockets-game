@@ -1,95 +1,99 @@
 var Player = require('../model/player');
-var Integrator = require('../model/integrator');
 var Team = require('../model/team');
-var Obstacle = require('../model/obstacle');
 var Projectile = require('../model/projectile');
+var Obstacle = require('../model/obstacle');
 var Random = require('../model/random');
-var Physics = require('physicsjs');
+var World = require('../model/world');
 
 // Constructor
 function Game() {
   // Physics
   this.bounds = {x: 800, y: 450};
-  this.world = Physics();
-  this.extensions();
-  this.behaviors();
-  this.integrators();
-  this.subscribers();
+  this.world = new World(this);
   // Empty state
-  this.players = {};
+  this.queue = [];
+  this.players = [];
   this.teams = [];
   this.obstacles = [];
   this.projectiles = [];
+  this.phaseTime = {
+    queue: 10000,
+    play: 60000,
+    results: 10000
+  };
   // Setup game
-  this.addObstacles();
-  this.addTeams(['red', 'blue']);
+  this.setPhase('queue');
 }
 
 // Instance methods
-Game.prototype.extensions = function() {
-  Player.extension();
-  Projectile.extension();
-  Integrator.extension();
-  Obstacle.extension();
+Game.prototype.setPhase = function(phase) {
+  if(phase !== undefined){
+    this.phase = phase;
+    clearTimeout(this.phaseTime.timeout);
+  }else{
+    if(this.phase==='queue' && this.aliveTeams().length <= 1) return;
+    this.phase = this.nextPhase(this.phase);
+  }
+  switch(this.phase) {
+    case 'queue':
+      this.reset();
+      this.phaseTime.nextGame = new Date().getTime() + this.phaseTime.queue;
+      break;
+    case 'play':
+      this.phaseTime.nextGame = new Date().getTime() + this.phaseTime.play + this.phaseTime.results + this.phaseTime.queue;
+      break;
+    case 'results':
+      this.phaseTime.nextGame = new Date().getTime() + this.phaseTime.results + this.phaseTime.queue;
+      break;
+  }
+  this.phaseTime.nextPhase = new Date().getTime() + this.phaseTime[this.phase];
+  this.phaseTime.timeout = setTimeout(this.setPhase.bind(this), this.phaseTime[this.phase]);
 };
-Game.prototype.behaviors = function() {
-  this.world.add([
-    Physics.behavior('body-impulse-response', {
-      check: 'collisions:desired'
-    }),
-    Physics.behavior('body-collision-detection'),
-    Physics.behavior('sweep-prune'),
-    Physics.behavior('edge-collision-detection', {
-      aabb: Physics.aabb(0, 0, 800, 450),
-      restitution: 0.6,
-      cof: 0.2
-    })
-  ]);
-};
-Game.prototype.integrators = function() {
-  this.world.add(Physics.integrator('verlet-custom'));
-};
-Game.prototype.subscribers = function() {
-  this.world.on('collisions:detected', function(data){
-    for(var i=0; i<data.collisions.length; i++){
-      var collision = data.collisions[i];
-      if(collision.bodyA.name === 'projectile' && collision.bodyB.name === 'player' || collision.bodyA.name === 'player' && collision.bodyB.name === 'projectile'){
-        var player = (collision.bodyA.name === 'player') ? collision.bodyA : collision.bodyB;
-        var projectile = (collision.bodyA.name === 'projectile') ? collision.bodyA : collision.bodyB;
-
-        if(projectile.active){
-          if(!projectile.newborn || projectile.owner.shooter !== player.owner)
-            this.playerHit(player.owner, projectile.owner);
-        }else if(player.owner.alive && player.owner.ammo<player.owner.maxAmmo){
-          data.collisions.splice(i, 1); // Do not record collision
-          if(player.state.pos.dist(projectile.state.pos) < player.radius)
-            this.ammoPickup(player.owner, projectile.owner);
-        }
-      }
-    }
-    this.world.emit('collisions:desired', data);
-  }.bind(this));
+Game.prototype.nextPhase = function(phase) {
+  switch(phase) {
+    case 'queue': return 'play';
+    case 'play': return 'results';
+    case 'results': return 'queue';
+  }
 };
 Game.prototype.addPlayer = function(id) {
   if(this.teams.length < 1) return;
   var smallestTeam = this.teams.sort(function(a, b) {return (a.length > b.length) ? 1 : -1;})[0];
   var player = new Player(id, smallestTeam);
 
-  this.players[id] = player;
-  this.world.add(player.body);
+  this.players.push(player);
+  this.world.add(player);
+
+  if(this.phaseTime.nextGame<new Date().getTime() && this.aliveTeams().length>1){
+    this.setPhase('play');
+  }
 };
-Game.prototype.removePlayer = function(id) {
-  var player = this.players[id];
-  player.delete();
-  delete this.players[id];
+Game.prototype.addId = function(id) {
+  if(this.phase === 'queue'){
+    this.addPlayer(id);
+  }else{
+    this.queue.push(id);
+  }
 };
-Game.prototype.playerHit = function(player, projectile) {
-  player.alive = false;
+Game.prototype.removeId = function(id) {
+  var player = this.getPlayer(id);
+  if(player !== undefined){
+    player.delete();
+    var index = this.players.indexOf(player);
+    if(index >= 0) this.players.splice(index, 1);
+  }
+  var index = this.queue.indexOf(id);
+  if(index >= 0) this.queue.splice(index, 1);
 };
 Game.prototype.ammoPickup = function(player, projectile) {
-  player.ammo++;
-  projectile.delete();
-  this.projectiles.splice(this.projectiles.indexOf(projectile), 1);
+  player.ammoPickup(projectile);
+  var index = this.projectiles.indexOf(projectile);
+  if(index >= 0) this.projectiles.splice(index, 1);
+};
+Game.prototype.addAmmo = function(count) {
+  for(var i=0; i<count; i++){
+    this.addProjectile(Random.rangedRandomFloat(140, this.bounds.x-140), Random.rangedRandomFloat(140, this.bounds.y-140));
+  }
 };
 Game.prototype.addTeams = function(names) {
   for(var index=0; index<names.length; index++){
@@ -114,11 +118,13 @@ Game.prototype.addObstacles = function() {
     {x: 662.5, y: 225, w: 275},
   ];
 
-  // Prevent closing in a corner
+  // Push horizontal obstacle, prevent closing in a corner
   if(horizontalRow === 1 // Horizontal obstacle is vertically centered
     || verticalObstacleMatrix[horizontalRow?1:0][horizontalColumn*2] !== (horizontalRow?2:1) // Horizontally exterior vertical obstacle is vertically interior
     || verticalObstacleMatrix[horizontalRow?1:0][1] !== (horizontalRow?3:0)){ // Horizontally centered vertical obstacle is vertically exterior
-    positions.push({x: 332.5+135*horizontalColumn, y: 112.5*(horizontalRow+1), w: 155}); // Push horizontal obstacle position
+    if(Random.randomBool()){
+      positions.push({x: 332.5+135*horizontalColumn, y: 112.5*(horizontalRow+1), w: 155}); // Push horizontal obstacle position
+    }
   }
   // Push vertical obstacle positions
   for(var i=0; i<verticalObstacleMatrix.length; i++){
@@ -127,46 +133,86 @@ Game.prototype.addObstacles = function() {
     }
   }
   // Add obstacles
-  for(var i=0; i<positions.length; i++){
-    var obstacle = new Obstacle(positions[i].x, positions[i].y, positions[i].w||20, positions[i].h||20);
+  positions.forEach(function(position) {
+    var obstacle = new Obstacle(position.x, position.y, position.w||20, position.h||20);
     this.obstacles.push(obstacle);
-    this.world.add(obstacle.body);
-  }
+    this.world.add(obstacle);
+  }.bind(this));
 };
-Game.prototype.reset = function() {
-  this.forEachPlayer(function(player) {this.removePlayer(player.id);}.bind(this));
-};
-Game.prototype.state = function(callback) {
-  var players = [];
-  this.forEachPlayer(function(player) {
-    players.push(player.toState());
-  });
-  return {
-    'players': players,
-    'obstacles': this.obstacles.map(function(obstacle) {return obstacle.toState();}),
-    'projectiles': this.projectiles.map(function(projectile) {return projectile.toState();})
-  };
-};
-Game.prototype.forEachPlayer = function(callback) {
-  for(var id in this.players) {
-    callback(this.players[id]);
-  }
-};
-Game.prototype.tick = function() {
+Game.prototype.step = function() {
+  this.checkEndgame();
   this.world.step();
 };
+Game.prototype.reset = function() {
+  this.players.forEach(function(player) {
+    this.queue.push(player.id);
+    player.delete();
+  }.bind(this));
+  this.projectiles.forEach(function(projectile) {projectile.delete();});
+  this.obstacles.forEach(function(obstacle) {obstacle.delete();});
+  this.players.length = 0;
+  this.teams.length = 0;
+  this.projectiles.length = 0;
+  this.obstacles.length = 0;
+  this.addObstacles();
+  this.addAmmo(10);
+  this.addTeams(['red', 'blue']);
+
+  this.queue.forEach(function(id) {
+    this.addPlayer(id);
+  }.bind(this));
+  this.queue.length = 0;
+};
+Game.prototype.state = function() {
+  return {
+    phase: this.phase,
+    queue: this.queue,
+    nextPhase: Math.ceil((this.phaseTime.nextPhase-new Date().getTime())/1000),
+    nextGame: Math.ceil((this.phaseTime.nextGame-new Date().getTime())/1000),
+    players: this.players.map(function(player) {return player.toState();}),
+    obstacles: this.obstacles.map(function(obstacle) {return obstacle.toState();}),
+    projectiles: this.projectiles.map(function(projectile) {return projectile.toState();})
+  };
+};
+Game.prototype.checkEndgame = function() {
+  if(this.phase !== 'play') return;
+  var aliveTeams = this.aliveTeams();
+  if(aliveTeams.length <= 1){
+    console.log(aliveTeams[0].name+' team won'); // DEBUG
+    this.setPhase('results');
+  }
+};
+Game.prototype.aliveTeams = function() {
+  return this.teams.filter(function(team) {
+    return team.length > 0;
+  });
+};
+Game.prototype.getPlayer = function(id) {
+  var matches = this.players.filter(function(player) {
+    return player.id == id;
+  });
+  if(matches.length > 0)
+    return matches[0];
+};
 Game.prototype.acceleratePlayer = function(id, x, y) {
-  var player = this.players[id];
+  if(this.phase!=='play' && this.phase!=='results') return;
+  var player = this.getPlayer(id);
   if(player !== undefined){
     player.accelerate(x, y);
   }
 };
-Game.prototype.addProjectile = function(id, x, y) {
-  var player = this.players[id];
+Game.prototype.addProjectile = function(x, y) {
+  var projectile = new Projectile(null, x, y);
+  this.world.add(projectile);
+  this.projectiles.push(projectile);
+};
+Game.prototype.shootProjectile = function(id, x, y) {
+  if(this.phase !== 'play') return;
+  var player = this.getPlayer(id);
   if(player !== undefined){
-    var projectile = player.addProjectile(x, y);
+    var projectile = player.shootProjectile(x, y);
     if(projectile !== undefined){
-      this.world.add(projectile.body);
+      this.world.add(projectile);
       this.projectiles.push(projectile);
     }
   }
