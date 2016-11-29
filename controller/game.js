@@ -156,7 +156,7 @@ Game.prototype.reset = function() {
   this.obstacles.length = 0;
   this.addObstacles();
   this.addAmmo(10);
-  this.addTeams(['red', 'blue']);
+  this.addTeams(['red', 'blue', 'green', 'purple']);
 
   this.queue.forEach(function(id) {
     this.addPlayer(id);

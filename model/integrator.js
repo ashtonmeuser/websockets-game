@@ -10,7 +10,7 @@ Integrator.extension = function() {
   Physics.integrator('verlet-custom', 'verlet', function(parent){
     return {
       init: function(options) {
-        options.drag = 0.004;
+        options.drag = 0.0035;
         options.playerDrag = 0.1;
         parent.init.call(this, options);
       },
