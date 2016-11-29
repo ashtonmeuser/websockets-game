@@ -38,9 +38,9 @@ Projectile.extension = function() {
         Physics.util.extend(options, {
           radius: 10,
           restitution: 0.8,
-          maxSpeed: 1.0,
+          maxSpeed: 0.8,
           active: false,
-          killSpeed: 0.3,
+          killSpeed: 0.25,
           newborn: true
         });
         parent.init.call(this, options);
