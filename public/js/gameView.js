@@ -14,72 +14,33 @@ function GameView(game, canvas, page) {
 
 // Class methods
 GameView.prototype.update = function() {
-
-  var position = {x:0, y:0};
+  if(!this.bounds) return;
   this.clear();
-
-  // Display Intro/Game/Results Canvases
-  switch (this.page) {
-
-    case 'Intro': {  // Intro - display game title, choose icon, enter game button.
-      this.drawPlayers();
-      this.drawProjectiles();
-      this.drawObstacles();
-      // Backfill
-      this.context.fillStyle = 'rgba('+256+','+256+','+256+','+.6+')';
-      this.context.fillRect(0,0,800,450);
-      this.context.fillStyle = 'rgba('+100+','+200+','+250+','+.6+')';
-      this.context.fillRect(0,0,800,450);
-
-      // Draw avatar selection highlight.
-      if (this.avatarSelection >=0 && this.avatarAvailable[this.avatarSelection] === 1){
-        this.context.fillStyle = 'rgba('+256+','+256+','+256+','+1+')';
-        position.x = constants.avatarPos[this.avatarSelection].x + (constants.avatarSize.w/2);
-        position.y = constants.avatarPos[this.avatarSelection].y + (constants.avatarSize.h/2);
-        this.context.beginPath();
-        this.context.arc(position.x, position.y, constants.avatarSize.h/2 + 4, 0, 2 * Math.PI);
-        this.context.closePath();
-        this.context.fill();
-      }
-
-      // Text, Avatars and Buttons
-      for (var i = 0; i < constants.button.length; i++){
-        this.drawImage(constants.button[i], constants.buttonPos[i], constants.buttonSize[i], false);
-      }
-      for (var i = 0; i < constants.text.length; i++){
-        this.drawText(constants.text[i], constants.textFill[i], constants.textFont[i], constants.textPos[i])
-      }
-      for (var i = 0; i < constants.avatar.length; i++){
-        this.drawImage(constants.avatar[i], constants.avatarPos[i], constants.avatarSize, true);
-        if (!this.avatarAvailable[i]){
-          this.context.globalAlpha = 0.4;
-          this.drawImage('notAvailable.png', constants.avatarPos[i], constants.avatarSize, true);
-          this.context.globalAlpha = 1;
-        }
-      }
-
-
+  this.drawPlayers();
+  this.drawProjectiles();
+  this.drawObstacles();
+  switch(this.game.state.phase) {
+    case 'join':
+      this.drawTextScreen(0.6);
+      this.drawLabel({x:this.bounds.x/2, y:200}, 'Select character and click join', 'black');
       break;
-    }
-    case 'Game': {  // Game - display game in foreground.
-      this.drawPlayers();
-      this.drawProjectiles();
-      this.drawObstacles();
+    case 'queue':
+      this.drawTextScreen(0.6);
+      var message = (this.game.state.nextGame < 0) ? 'Waiting for players' : 'Game starts in '+this.game.state.nextGame+'s';
+      this.drawLabel({x:this.bounds.x/2, y:200}, 'Queue', 'black');
+      this.drawLabel({x:this.bounds.x/2, y:300}, message, 'black');
       break;
-    }
-    case 'Results': {  // Results - display winner.
-
-
+    case 'play':
+      this.drawHud(0.5, this.game.state.ammo, this.game.state.nextPhase);
       break;
-    }
-
-    default:{
-    }
+    case 'results':
+      this.drawTextScreen(0.6);
+      this.drawLabel({x:this.bounds.x/2, y:200}, 'Results', 'black');
+      this.drawLabel({x:this.bounds.x/2, y:300}, 'Game starts in '+this.game.state.nextGame+'s', 'black');
+      break;
   }
-
 };
 GameView.prototype.clear = function() {
-  if(!this.bounds) return;
   this.context.clearRect(0, 0, this.bounds.x, this.bounds.y);
 };
 GameView.prototype.drawPlayers = function() {
@@ -100,6 +61,32 @@ GameView.prototype.drawProjectiles = function() {
     this.context.closePath();
     this.context.fill();
   }.bind(this));
+};
+GameView.prototype.drawHud = function(alpha, ammo, timeout) {
+  this.context.fillStyle = 'rgba(200, 130, 0, '+alpha+')';
+  this.context.beginPath();
+  this.context.arc(20, 20, 10, 0, 2 * Math.PI);
+  this.context.closePath();
+  this.context.fill();
+  this.context.fillStyle = 'rgba(128, 128, 128, '+alpha+')';
+  this.context.beginPath();
+  this.context.arc(20, 45, 10, 0, 2 * Math.PI);
+  this.context.closePath();
+  this.context.fill();
+  this.context.strokeStyle = 'rgba(255, 255, 255, '+alpha+')';
+  this.context.lineWidth = 3;
+  this.context.beginPath();
+  this.context.moveTo(20, 35);
+  this.context.lineTo(20, 45);
+  this.context.lineTo(27.01, 52.07);
+  this.context.stroke();
+  this.context.closePath();
+  this.drawLabel({x:35, y:20}, ammo, 'rgba(0, 0, 0, '+alpha+')', 'left', 20);
+  this.drawLabel({x:35, y:45}, timeout, 'rgba(0, 0, 0, '+alpha+')', 'left', 20);
+};
+GameView.prototype.drawTextScreen = function(alpha) {
+  this.context.fillStyle = 'rgba(255, 255, 255, '+alpha+')';
+  this.context.fillRect(0, 0, this.bounds.x, this.bounds.y);
 };
 GameView.prototype.drawObstacles = function() {
   this.game.state.obstacles.forEach(function(obstacle) {
@@ -135,9 +122,11 @@ GameView.prototype.drawImage = function(source, position, size, round){
     this.context.drawImage(imgObject, position.x, position.y, size.w, size.h);
   }
 }
-GameView.prototype.drawText = function(text, fill, font, position){
-  this.context.font = font;
-  this.context.fillStyle = fill;
+GameView.prototype.drawLabel = function(position, text, color, align, size) {
+  this.context.fillStyle = color || 'white';
+  this.context.textAlign = align || 'center';
+  this.context.textBaseline = 'middle';
+  this.context.font = 'bold '+(size || 25)+'px Arial';
   this.context.fillText(text, position.x, position.y);
 }
 GameView.prototype.avatarSelect = function(selection){

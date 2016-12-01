@@ -7,15 +7,17 @@ function Projectile(player, x, y) {
   this.deactiveColor = new Color(128, 128, 128);
   this.shooter = player;
   this.body = Physics.body('projectile', {
-    x: player.body.state.pos.x,
-    y: player.body.state.pos.y,
+    x: x || player.body.state.pos.x,
+    y: y || player.body.state.pos.y,
     owner: this
   });
+  this.body.sleep(false);
 }
 
 // Instance methods
 Projectile.prototype.accelerate = function(x, y) {
   this.body.accelerate(Physics.vector(x, y).vsub(this.body.state.pos).normalize().mult(1));
+  this.body.sleep(false);
 };
 Projectile.prototype.delete = function() {
   this.body._world.remove(this.body);
@@ -35,10 +37,10 @@ Projectile.extension = function() {
       init: function(options) {
         Physics.util.extend(options, {
           radius: 10,
-          restitution: 0.6,
-          maxSpeed: 1.5,
+          restitution: 0.8,
+          maxSpeed: 0.8,
           active: false,
-          killSpeed: 0.3,
+          killSpeed: 0.25,
           newborn: true
         });
         parent.init.call(this, options);

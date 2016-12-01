@@ -1,4 +1,4 @@
-let key_code = {'left': 37, 'right': 39, 'up': 38, 'down': 40};
+let key_code = {'left': [37, 65], 'right': [39, 68], 'up': [38, 87], 'down': [40, 83]};
 var key_state = {'left': false, 'right': false, 'up': false, 'down': false};
 
 // Constructor
@@ -48,11 +48,13 @@ window.onload = function() {
   var socket = io();
   var canvas = document.getElementById('canvas');
   var game = new Game(socket);
-  var gameView = new GameView(game, canvas, 'Intro');
+  var gameView = new GameView(game, canvas);
   var mobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
   socket.on('initialize', function(data) {
+    game.id = data.id;
     gameView.bounds = data.bounds;
+    canvas.style.display = 'block';
     if(mobile){ // Portrait
       canvas.width = gameView.bounds['y'];
       canvas.height = gameView.bounds['x'];
@@ -66,7 +68,8 @@ window.onload = function() {
   });
 
   socket.on('state', function(state) {
-    window.s = state;
+    window.s = state; // DEBUG
+    window.g = game; // DEBUG
     game.updateState(state);
   });
 
@@ -116,14 +119,14 @@ function handleGameButtonPress(){
 
 function handleKeyDown(event) {
   for(var direction in key_code){
-    if(event.keyCode === key_code[direction])
+    if(key_code[direction].indexOf(event.keyCode) >= 0)
       key_state[direction] = true;
   }
 }
 
 function handleKeyUp(event) {
   for(var direction in key_code){
-    if(event.keyCode === key_code[direction])
+    if(key_code[direction].indexOf(event.keyCode) >= 0)
       key_state[direction] = false;
   }
 }
@@ -172,7 +175,7 @@ function handleClick(event, gameView, game, socket) {
   if (avatarSelection >= 0){
     gameView.avatarSelect(avatarSelection);
   }
-  game.addProjectile(mousePos.x, mousePos.y);
+  game.shootProjectile(x, y);
   event.preventDefault();
 }
 

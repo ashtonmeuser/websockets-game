@@ -19,7 +19,7 @@ server.listen(app.get('port'), function(){
 });
 
 setInterval(function() {
-  game.tick();
+  game.step();
 }, 1000/160);
 
 setInterval(function() {
@@ -27,26 +27,27 @@ setInterval(function() {
 }, 1000/60);
 
 socket.on('connection', function(socket){ // Listen for connections
-  console.log('Connection ', socket.id);
+  console.log('Connection ', socket.id); // DEBUG
   socket.emit('initialize', {
-    bounds: {x: game.bounds.x, y: game.bounds.y}
+    id: socket.id,
+    bounds: game.bounds
   });
+  game.addId(socket.id); // DEBUG
 
   socket.on('disconnect', function(){ // Listen for disconnections
-    console.log('Disconnection ', socket.id);
-    game.removePlayer(socket.id);
+    console.log('Disconnection ', socket.id); // DEBUG
+    game.removeId(socket.id);
   });
 
-  socket.on('addPlayer', function(avatar){
-    game.addPlayer(socket.id, avatar);
-    socket.emit('avatarChosen', avatar);
+  socket.on('addPlayer', function(){
+    game.addId(socket.id);
   });
 
   socket.on('updatePlayerAcceleration', function(x, y){
     game.acceleratePlayer(socket.id, x, y);
   });
 
-  socket.on('addProjectile', function(x, y){
-    game.addProjectile(socket.id, x, y);
+  socket.on('shootProjectile', function(x, y){
+    game.shootProjectile(socket.id, x, y);
   });
 });
