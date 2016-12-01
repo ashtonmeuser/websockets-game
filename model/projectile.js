@@ -20,7 +20,7 @@ Projectile.prototype.accelerate = function(x, y) {
   this.body.sleep(false);
 };
 Projectile.prototype.delete = function() {
-  this.body._world.remove(this.body);
+  if(this.body._world) this.body._world.remove(this.body);
 };
 Projectile.prototype.toState = function() {
   return {
