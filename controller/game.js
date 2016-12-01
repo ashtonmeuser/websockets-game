@@ -56,10 +56,10 @@ Game.prototype.nextPhase = function(phase) {
     case 'results': return 'queue';
   }
 };
-Game.prototype.addPlayer = function(id) {
+Game.prototype.addPlayer = function(id, avatar) {
   if(this.teams.length < 1) return;
   var smallestTeam = this.teams.sort(function(a, b) {return (a.length > b.length) ? 1 : -1;})[0];
-  var player = new Player(id, smallestTeam);
+  var player = new Player(id, smallestTeam, avatar);
 
   this.players.push(player);
   this.world.add(player);
@@ -68,9 +68,9 @@ Game.prototype.addPlayer = function(id) {
     this.setPhase('play');
   }
 };
-Game.prototype.addId = function(id) {
+Game.prototype.addId = function(id, avatar) {
   if(this.phase === 'queue'){
-    this.addPlayer(id);
+    this.addPlayer(id, avatar);
   }else{
     this.queue.push(id);
   }

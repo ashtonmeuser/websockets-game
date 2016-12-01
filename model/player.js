@@ -4,7 +4,7 @@ var Random = require('./random');
 var Physics = require('physicsjs');
 
 // Constructor
-function Player(id, team) {
+function Player(id, team, avatar) {
   this.id = id;
   this.team = team;
   this.team.addPlayer();
@@ -31,7 +31,7 @@ Player.prototype.toState = function() {
     name: this.name,
     radius: this.body.radius,
     position: this.body.state.pos.values(),
-    avatar: this.avatar
+    avatar: this.avatar||'avatarDarth.png'
   };
 };
 Player.prototype.delete = function() {

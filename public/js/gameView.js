@@ -14,6 +14,8 @@ function GameView(game, canvas, page) {
 
 // Class methods
 GameView.prototype.update = function() {
+
+  var position = {x: 0, y:0};
   if(!this.bounds) return;
   this.clear();
   this.drawPlayers();
@@ -21,8 +23,40 @@ GameView.prototype.update = function() {
   this.drawObstacles();
   switch(this.game.state.phase) {
     case 'join':
-      this.drawTextScreen(0.6);
-      this.drawLabel({x:this.bounds.x/2, y:200}, 'Select character and click join', 'black');
+//      this.drawTextScreen(0.6);
+//      this.drawLabel({x:this.bounds.x/2, y:200}, 'Select character and click join', 'black');
+        // Backfill
+          this.context.fillStyle = 'rgba('+256+','+256+','+256+','+.6+')';
+          this.context.fillRect(0,0,800,450);
+          this.context.fillStyle = 'rgba('+100+','+200+','+250+','+.6+')';
+          this.context.fillRect(0,0,800,450);
+
+          // Draw avatar selection highlight.
+          if (this.avatarSelection >=0 && this.avatarAvailable[this.avatarSelection] === 1){
+            this.context.fillStyle = 'rgba('+256+','+256+','+256+','+1+')';
+            position.x = constants.avatarPos[this.avatarSelection].x + (constants.avatarSize.w/2);
+            position.y = constants.avatarPos[this.avatarSelection].y + (constants.avatarSize.h/2);
+            this.context.beginPath();
+            this.context.arc(position.x, position.y, constants.avatarSize.h/2 + 4, 0, 2 * Math.PI);
+            this.context.closePath();
+            this.context.fill();
+          }
+
+          // Text, Avatars and Buttons
+          for (var i = 0; i < constants.button.length; i++){
+            this.drawImage(constants.button[i], constants.buttonPos[i], constants.buttonSize[i], false);
+          }
+          for (var i = 0; i < constants.text.length; i++){
+            this.drawLabel(constants.textPos[i], constants.text[i], constants.textColor[i], '', constants.textSize[i])
+          }
+          for (var i = 0; i < constants.avatar.length; i++){
+            this.drawImage(constants.avatar[i], constants.avatarPos[i], constants.avatarSize, true);
+            if (!this.avatarAvailable[i]){
+              this.context.globalAlpha = 0.4;
+              this.drawImage('notAvailable.png', constants.avatarPos[i], constants.avatarSize, true);
+              this.context.globalAlpha = 1;
+            }
+          }
       break;
     case 'queue':
       this.drawTextScreen(0.6);

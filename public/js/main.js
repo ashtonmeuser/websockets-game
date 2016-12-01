@@ -31,15 +31,15 @@ const constants = {
   'text': [ 'Poly Wars',
             'Choose your Player',
             'Enter Game'],
-  'textFont': [ '80px Tahoma',
-                '20px Tahoma',
-                '15px Helvetica'],
-  'textFill': [ 'black',
+  'textSize': [ 80,
+                20,
+                15],
+  'textColor': [ 'black',
                 'black',
                 'black'],
-  'textPos': [{'x':210, 'y':90},
-              {'x':295, 'y':180},
-              {'x':340, 'y':395}]
+  'textPos': [{'x':380, 'y':90},
+              {'x':380, 'y':180},
+              {'x':380, 'y':390}]
 };
 // var images = constants.avatars.map(function(avatar) {return new Image().source=avatar;});
 
@@ -162,7 +162,6 @@ function handleClick(event, gameView, game, socket) {
   // Enter game button.
   if (mousePos.x > constants.buttonPos[0].x && mousePos.x < (constants.buttonPos[0].x + constants.buttonSize[0].w)
     && mousePos.y > constants.buttonPos[0].y && mousePos.y < (constants.buttonPos[0].y + constants.buttonSize[0].h)){
-    gameView.page = 'Game';
     socket.emit('addPlayer', gameView.avatarSelection);
   }
   // Avatar hit.
@@ -175,7 +174,7 @@ function handleClick(event, gameView, game, socket) {
   if (avatarSelection >= 0){
     gameView.avatarSelect(avatarSelection);
   }
-  game.shootProjectile(x, y);
+  game.shootProjectile(mousePos.x, mousePos.y);
   event.preventDefault();
 }
 
