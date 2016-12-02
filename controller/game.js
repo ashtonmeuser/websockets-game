@@ -59,8 +59,6 @@ Game.prototype.nextPhase = function(phase) {
 Game.prototype.addPlayer = function(player) {
   if(this.teams.length < 1) return;
   var smallestTeam = this.teams.sort(function(a, b) {return (a.length > b.length) ? 1 : -1;})[0];
-  player.alive = true;
-  player.addBody();
   player.assignTeam(smallestTeam);
   this.players.push(player);
   this.world.add(player);
@@ -173,6 +171,7 @@ Game.prototype.reset = function() {
 Game.prototype.state = function() {
   return {
     phase: this.phase,
+    winningTeam: this.winningTeam,
     queue: this.queue.map(function(player) {return player.id;}),
     nextPhase: Math.ceil((this.phaseTime.nextPhase-new Date().getTime())/1000),
     nextGame: Math.ceil((this.phaseTime.nextGame-new Date().getTime())/1000),
@@ -185,7 +184,7 @@ Game.prototype.checkEndgame = function() {
   if(this.phase !== 'play') return;
   var aliveTeams = this.aliveTeams();
   if(aliveTeams.length <= 1){
-    console.log(aliveTeams[0].name+' team won'); // DEBUG
+    this.winningTeam = aliveTeams[0].name;
     this.setPhase('results');
   }
 };

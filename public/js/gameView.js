@@ -28,23 +28,24 @@ GameView.prototype.update = function() {
       if(this.avatarTaken(this.avatarSelection)) this.avatarSelection=undefined;
       this.drawAlphaScreen();
       this.drawLabel({x:this.bounds.x/2, y:80}, 'Websockets Game', 'black', 'center', 40);
-      this.drawLabel({x:this.bounds.x/2, y:160}, 'Choose your player', 'black');
+      this.drawLabel({x:this.bounds.x/2, y:160}, 'Choose your avatar', 'black');
       this.drawButton({x:this.bounds.x/2+this.buttonOffset.x, y:this.bounds.y/2+this.buttonOffset.y}, this.buttonSize);
       this.drawAvatars(this.avatarSelection, {x: this.bounds.x/2, y: 205});
       break;
     case 'queue':
       this.drawAlphaScreen();
       var message = (this.game.state.nextGame < 0) ? 'Waiting for players' : 'Game starts in '+this.game.state.nextGame+'s';
-      this.drawLabel({x:this.bounds.x/2, y:200}, 'Queue', 'black');
-      this.drawLabel({x:this.bounds.x/2, y:300}, message, 'black');
+      this.drawLabel({x:this.bounds.x/2, y:200}, 'Preparing next game', 'black');
+      this.drawLabel({x:this.bounds.x/2, y:250}, message, 'black');
       break;
     case 'play':
       this.drawHud(0.5, this.game.state.ammo, this.game.state.nextPhase);
       break;
     case 'results':
       this.drawAlphaScreen();
-      this.drawLabel({x:this.bounds.x/2, y:200}, 'Results', 'black');
-      this.drawLabel({x:this.bounds.x/2, y:300}, 'Game starts in '+this.game.state.nextGame+'s', 'black');
+      var message = (this.game.state.winningTeam===undefined) ? 'Tie game' : this.game.state.winningTeam.charAt(0).toUpperCase()+this.game.state.winningTeam.slice(1)+' team wins';
+      this.drawLabel({x:this.bounds.x/2, y:200}, message, 'black');
+      this.drawLabel({x:this.bounds.x/2, y:250}, 'Game starts in '+this.game.state.nextGame+'s', 'black');
       break;
   }
 };
@@ -109,7 +110,7 @@ GameView.prototype.drawAvatar = function(imageObject, position, selected){
   var radius = 15;
 
   if(selected){
-    this.context.fillStyle = 'rgb(60, 160, 230)';
+    this.context.fillStyle = 'rgb(50, 180, 220)';
     this.context.beginPath();
     this.context.arc(position.x, position.y, radius*1.6, 0, 2*Math.PI);
     this.context.closePath();
@@ -139,7 +140,7 @@ GameView.prototype.drawLabel = function(position, text, color, align, size) {
   this.context.fillText(text, position.x, position.y);
 };
 GameView.prototype.drawButton = function(position, size) {
-  this.context.fillStyle = (this.avatarSelection===undefined) ? 'rgb(128, 128, 128)' : 'rgb(60, 160, 230)';
+  this.context.fillStyle = (this.avatarSelection===undefined) ? 'rgb(128, 128, 128)' : 'rgb(50, 180, 220)';
   this.context.fillRect(position.x-size.x/2, position.y-size.y/2, size.x, size.y);
   this.drawLabel(position, 'Join game');
 };
