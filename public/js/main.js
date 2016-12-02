@@ -9,7 +9,7 @@ window.onload = function() {
   var mobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
   socket.on('initialize', function(data) {
-    game.id = data.id;
+    game.id = socket.id;
     gameView.bounds = data.bounds;
     canvas.style.display = 'block';
     if(mobile){ // Portrait
@@ -39,10 +39,10 @@ window.onload = function() {
   window.addEventListener('keyup', handleKeyUp, true);
   window.addEventListener('resize', function(event) {handleResizeCanvas(gameView);}, false);
   if(mobile){
-    canvas.addEventListener('touchstart', function(event) {handleClick(event, gameView, game);}, false);
-    window.addEventListener('deviceorientation', function(event) {handleAccelerometer(event, game);}, false);
+    canvas.addEventListener('touchstart', function(event){handleClick(event, gameView, game, socket);}, false);
+    window.addEventListener('deviceorientation', function(event){handleAccelerometer(event, game);}, false);
   }else{
-    canvas.addEventListener('click', function(event) {handleClick(event, gameView, game);}, true);
+    canvas.addEventListener('click', function(event){handleClick(event, gameView, game, socket);}, false);
   }
 };
 
@@ -57,6 +57,10 @@ function getUserInput(game) {
 }
 
 // Event handlers
+function handleGameButtonPress(){
+  this.style.boxShadow = '0 8px 16px 0 rgba(0,0,0,0.1), 0 6px 20px 0 rgba(0,0,0,0.1)';
+}
+
 function handleKeyDown(event) {
   for(var direction in key_code){
     if(key_code[direction].indexOf(event.keyCode) >= 0)
@@ -85,19 +89,25 @@ function handleResizeCanvas(gameView) {
   }
 }
 
-function handleClick(event, gameView, game) {
-  var x = 0;
-  var y = 0;
+function handleClick(event, gameView, game, socket) {
+  var clickPosition = {x: 0, y:0};
+
   if(event.type === 'touchstart'){
     var tempX = (event.changedTouches[0].clientX-canvas.offsetLeft)*gameView.scale;
     var tempY = (event.changedTouches[0].clientY-canvas.offsetTop)*gameView.scale;
-    x = tempY;
-    y = -tempX + gameView.bounds.y;
+    clickPosition.x = tempY;
+    clickPosition.y = -tempX + gameView.bounds.y;
   }else if(event.type === 'click'){
-    x = (event.clientX-canvas.offsetLeft)*gameView.scale;
-    y = (event.clientY-canvas.offsetTop)*gameView.scale;
+    clickPosition.x = (event.clientX-canvas.offsetLeft)*gameView.scale;
+    clickPosition.y = (event.clientY-canvas.offsetTop)*gameView.scale;
   }
-  game.shootProjectile(x, y);
+
+  if(game.state.phase === 'join'){
+    gameView.buttonHit(clickPosition.x, clickPosition.y);
+    gameView.avatarHit(clickPosition.x, clickPosition.y);
+  }else{
+    game.shootProjectile(clickPosition.x, clickPosition.y);
+  }
   event.preventDefault();
 }
 
@@ -111,4 +121,12 @@ function handleAccelerometer(event, game) {
     y = -event.gamma/20;
   }
   game.updatePlayerAcceleration(x, y);
+}
+
+function getMousePos(canvas, event) {
+  var rect = canvas.getBoundingClientRect();
+  return {
+    x: Math.floor((event.clientX-rect.left)/(rect.right-rect.left)*canvas.width),
+    y: Math.floor((event.clientY-rect.top)/(rect.bottom-rect.top)*canvas.height) + 1
+  };
 }

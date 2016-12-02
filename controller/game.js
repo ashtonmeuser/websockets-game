@@ -60,7 +60,6 @@ Game.prototype.addPlayer = function(player) {
   if(this.teams.length < 1) return;
   var smallestTeam = this.teams.sort(function(a, b) {return (a.length > b.length) ? 1 : -1;})[0];
   player.assignTeam(smallestTeam);
-
   this.players.push(player);
   this.world.add(player);
 
@@ -68,8 +67,8 @@ Game.prototype.addPlayer = function(player) {
     this.setPhase('play');
   }
 };
-Game.prototype.addId = function(id) {
-  var player = new Player(id);
+Game.prototype.addId = function(id, avatar) {
+  var player = new Player(id, avatar);
 
   if(this.phase === 'queue'){
     this.addPlayer(player);
@@ -84,7 +83,7 @@ Game.prototype.removeId = function(id) {
     var index = this.players.indexOf(player);
     if(index >= 0) this.players.splice(index, 1);
   }
-  var player = this.getQueued(id); // DEBUG
+  var player = this.getQueued(id); // TODO: Refactor
   if(player !== undefined){
     player.delete();
     var index = this.queue.indexOf(player);
@@ -121,7 +120,7 @@ Game.prototype.addObstacles = function() {
     {x: 670, y: 56.25+112.5*3, h: 112.5},
     // Known horizontal
     {x: 137.5, y: 225, w: 275},
-    {x: 662.5, y: 225, w: 275},
+    {x: 662.5, y: 225, w: 275}
   ];
 
   // Push horizontal obstacle, prevent closing in a corner
@@ -172,6 +171,7 @@ Game.prototype.reset = function() {
 Game.prototype.state = function() {
   return {
     phase: this.phase,
+    winningTeam: this.winningTeam,
     queue: this.queue.map(function(player) {return player.id;}),
     nextPhase: Math.ceil((this.phaseTime.nextPhase-new Date().getTime())/1000),
     nextGame: Math.ceil((this.phaseTime.nextGame-new Date().getTime())/1000),
@@ -184,7 +184,13 @@ Game.prototype.checkEndgame = function() {
   if(this.phase !== 'play') return;
   var aliveTeams = this.aliveTeams();
   if(aliveTeams.length <= 1){
-    console.log(aliveTeams[0].name+' team won'); // DEBUG
+    try{
+      var team = aliveTeams[0];
+    }catch(e){
+      this.winningTeam = undefined;
+      return;
+    }
+    this.winningTeam = {name: team.name, color: team.aliveColor.string()};
     this.setPhase('results');
   }
 };

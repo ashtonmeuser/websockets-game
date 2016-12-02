@@ -32,15 +32,14 @@ socket.on('connection', function(socket){ // Listen for connections
     id: socket.id,
     bounds: game.bounds
   });
-  game.addId(socket.id); // DEBUG
 
   socket.on('disconnect', function(){ // Listen for disconnections
     console.log('Disconnection ', socket.id); // DEBUG
     game.removeId(socket.id);
   });
 
-  socket.on('addPlayer', function(){
-    game.addId(socket.id);
+  socket.on('addPlayer', function(avatar){
+    game.addId(socket.id, avatar);
   });
 
   socket.on('updatePlayerAcceleration', function(x, y){
