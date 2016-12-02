@@ -69,8 +69,10 @@ Game.prototype.addPlayer = function(player) {
   }
 };
 Game.prototype.addId = function(id, avatar) {
+  var player = new Player(id, avatar);
+
   if(this.phase === 'queue'){
-    this.addPlayer(id, avatar);
+    this.addPlayer(player);
   }else{
     this.queue.push(player);
   }

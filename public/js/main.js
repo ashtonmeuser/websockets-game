@@ -11,17 +11,13 @@ const constants = {
               'avatarMemeface.png',
               'avatarSmiley.png',
               'avatarFrown.png',
+              'avatarLaugh.jpg',
+              'avatarLaugh.jpg',
+              'avatarLaugh.jpg',
               'avatarLaugh.jpg'],
-  'avatarPos': [{'x':150, 'y':200},
-                {'x':200, 'y':200},
-                {'x':250, 'y':200},
-                {'x':300, 'y':200},
-                {'x':350, 'y':200},
-                {'x':400, 'y':200},
-                {'x':450, 'y':200},
-                {'x':500, 'y':200},
-                {'x':550, 'y':200},
-                {'x':600, 'y':200}],
+  'avatarPos': {x:0, y:-20},
+  'avatarSpacing': 50,
+  'avatarColumns': 9,
   'avatarSize': {'w':40, 'h':40},
   // Buttons
   'button': ['blueButton.jpg'],
@@ -41,8 +37,6 @@ const constants = {
               {'x':380, 'y':180},
               {'x':380, 'y':390}]
 };
-// var images = constants.avatars.map(function(avatar) {return new Image().source=avatar;});
-
 
 window.onload = function() {
   var socket = io();
@@ -74,14 +68,6 @@ window.onload = function() {
     gameView.populateAvatars();
   });
 
-  // socket.on('avatarChosen', function(avatar) {
-  //   gameView.avatarAvailable[avatar] = 0;
-  // });
-
-  // socket.on('avatarFreed', function(avatar) {
-  //   gameView.avatarAvailable[avatar] = 1;
-  // });
-
   (function animate(){ // Recursive animation call
     getUserInput(game);
     gameView.update();
@@ -96,10 +82,6 @@ window.onload = function() {
     window.addEventListener('deviceorientation', handleAccelerometer, false);
   }else{
     canvas.addEventListener('click', function(event){handleClick(event, gameView, game, socket);}, false);
-    // canvas.addEventListener('mousemove', function(event){
-    //   var mousePos=getMousePos(canvas, event);
-    // }, false);
-    // canvas.addEventListener('mouseover', )
   }
 };
 
@@ -162,21 +144,20 @@ function handleClick(event, gameView, game, socket) {
   // Detect item clicked.
   // Enter game button.
   if (mousePos.x > constants.buttonPos[0].x && mousePos.x < (constants.buttonPos[0].x + constants.buttonSize[0].w)
-    && mousePos.y > constants.buttonPos[0].y && mousePos.y < (constants.buttonPos[0].y + constants.buttonSize[0].h)){
+    && mousePos.y > constants.buttonPos[0].y && mousePos.y < (constants.buttonPos[0].y + constants.buttonSize[0].h)
+    && gameView.avatarAvailable[gameView.avatarSelection] == 1){
     socket.emit('addPlayer', gameView.avatarSelection);
   }
   // Avatar hit.
+  var rows = Math.ceil(constants.avatar.length/constants.avatarColumns);
   for (var i = 0; i < constants.avatar.length; i++){
-    if (mousePos.x > constants.avatarPos[i].x && mousePos.x < (constants.avatarPos[i].x + constants.avatarSize.w)
-      && mousePos.y > constants.avatarPos[i].y && mousePos.y < (constants.avatarPos[i].y + constants.avatarSize.h)){
+    var center = {x: gameView.bounds.x/2+constants.avatarPos.x+(i%constants.avatarColumns-constants.avatarColumns/2)*constants.avatarSpacing+constants.avatarSize.w/2, y:gameView.bounds.y/2+constants.avatarPos.y+Math.floor(i/constants.avatarColumns)*constants.avatarSpacing+constants.avatarSize.h/2}
+    if(Math.abs(mousePos.x-center.x)<constants.avatarSize.w/2 && Math.abs(mousePos.y-center.y)<constants.avatarSize.h/2){
       if (gameView.avatarAvailable[i] == 1){
         gameView.avatarSelection = i;
       }
     }
   }
-  // if (avatarSelection >= 0){
-  //   gameView.avatarSelect(avatarSelection);
-  // }
   game.shootProjectile(mousePos.x, mousePos.y);
   event.preventDefault();
 }

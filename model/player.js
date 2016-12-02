@@ -4,7 +4,7 @@ var Random = require('./random');
 var Physics = require('physicsjs');
 
 // Constructor
-function Player(id, team, avatar) {
+function Player(id, avatar) {
   this.id = id;
   this.ammo = 3;
   this.maxAmmo = 5;

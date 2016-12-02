@@ -8,7 +8,6 @@ function GameView(game, canvas, page) {
   this.gameTransparency = 0.1;
   this.context = this.canvas.getContext('2d');
   this.scale = 1;
-  this.avatarSelection = -1;
   // this.allAvatarAvailable = Array.apply(null, Array(constants.avatar.length)).map(Number.prototype.valueOf,1);
   this.allAvatarAvailable = [];
   for(var i=0; i<constants.avatar.length; i++) this.allAvatarAvailable.push(1);
@@ -34,17 +33,6 @@ GameView.prototype.update = function() {
           this.context.fillStyle = 'rgba('+100+','+200+','+250+','+.6+')';
           this.context.fillRect(0,0,800,450);
 
-          // Draw avatar selection highlight.
-          if (this.avatarSelection >=0 && this.avatarAvailable[this.avatarSelection] === 1){
-            this.context.fillStyle = 'rgba('+256+','+256+','+256+','+1+')';
-            position.x = constants.avatarPos[this.avatarSelection].x + (constants.avatarSize.w/2);
-            position.y = constants.avatarPos[this.avatarSelection].y + (constants.avatarSize.h/2);
-            this.context.beginPath();
-            this.context.arc(position.x, position.y, constants.avatarSize.h/2 + 4, 0, 2 * Math.PI);
-            this.context.closePath();
-            this.context.fill();
-          }
-
           // Text, Avatars and Buttons
           for (var i = 0; i < constants.button.length; i++){
             this.drawImage(constants.button[i], constants.buttonPos[i], constants.buttonSize[i], false);
@@ -52,14 +40,7 @@ GameView.prototype.update = function() {
           for (var i = 0; i < constants.text.length; i++){
             this.drawLabel(constants.textPos[i], constants.text[i], constants.textColor[i], '', constants.textSize[i])
           }
-          for (var i = 0; i < constants.avatar.length; i++){
-            this.drawImage(constants.avatar[i], constants.avatarPos[i], constants.avatarSize, true);
-            if (!this.avatarAvailable[i]){
-              this.context.globalAlpha = 0.4;
-              this.drawImage('notAvailable.png', constants.avatarPos[i], constants.avatarSize, true);
-              this.context.globalAlpha = 1;
-            }
-          }
+          this.drawAvatars(this.avatarSelection);
       break;
     case 'queue':
       this.drawTextScreen(0.6);
@@ -144,13 +125,12 @@ GameView.prototype.pageChangeGame = function(){
 GameView.prototype.drawImage = function(source, position, size, round){
 
   var imgObject = new Image();
-  var radius = size.h / 2;
 
   imgObject.src = source;
   if (round){
     this.context.save();
     this.context.beginPath();
-    this.context.arc(position.x + radius, position.y + radius, radius, 0, 2*Math.PI, false);
+    this.context.arc(position.x+size.w/2, position.y+size.h/2, size.h/2, 0, 2*Math.PI, false);
     this.context.closePath();
     this.context.clip();
     this.context.drawImage(imgObject, position.x, position.y, size.w, size.h);
@@ -169,10 +149,34 @@ GameView.prototype.drawLabel = function(position, text, color, align, size) {
 GameView.prototype.avatarSelect = function(selection){
   this.avatarSelection = selection;
 }
+GameView.prototype.drawAvatars = function(selectedIndex){
+  var rows = Math.ceil(constants.avatar.length/constants.avatarColumns);
+  for (var i = 0; i<constants.avatar.length; i++){
+    if(constants.avatar[i] === undefined) continue;
+    var position = {x: this.bounds.x/2+constants.avatarPos.x+(i%constants.avatarColumns-constants.avatarColumns/2)*constants.avatarSpacing, y:this.bounds.y/2+constants.avatarPos.y+Math.floor(i/constants.avatarColumns)*constants.avatarSpacing}
+    if(this.avatarSelection===i){
+        this.context.fillStyle = 'rgba('+256+','+256+','+256+','+1+')';
+        this.context.beginPath();
+        this.context.arc(position.x+constants.avatarSize.w/2, position.y+constants.avatarSize.h/2, constants.avatarSize.h/2 + 4, 0, 2 * Math.PI);
+        this.context.closePath();
+        this.context.fill();
+    }
+    this.drawImage(constants.avatar[i], position, constants.avatarSize, true);
+    if (!this.avatarAvailable[i]){
+      this.context.globalAlpha = 0.4;
+      this.drawImage('notAvailable.png', position, constants.avatarSize, true);
+      this.context.globalAlpha = 1;
+    }
+  }
+}
+
 GameView.prototype.populateAvatars = function(){
   this.avatarAvailable.length = 0;
   for(var i=0; i<constants.avatar.length; i++) this.avatarAvailable.push(1);
   this.game.state.players.forEach(function(player) {
     this.avatarAvailable[player.avatar] = 0;
   }.bind(this));
+  if (this.avatarAvailable[this.avatarSelection] == 0){
+    this.avatarSelection = undefined;
+  }
 }
