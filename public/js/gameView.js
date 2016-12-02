@@ -126,7 +126,7 @@ GameView.prototype.drawImage = function(source, position, size, round){
 
   var imgObject = new Image();
 
-  imgObject.src = source;
+  imgObject.src = '/images/'+source;
   // if (round){
   //   this.context.save();
   //   this.context.beginPath();
@@ -163,7 +163,7 @@ GameView.prototype.drawAvatars = function(selectedIndex){
     }
     this.drawImage(constants.avatar[i], position, constants.avatarSize, true);
     if (!this.avatarAvailable[i]){
-      this.context.globalAlpha = 0.4;
+      this.context.globalAlpha = 0.8;
       this.drawImage('notAvailable.png', position, constants.avatarSize, true);
       this.context.globalAlpha = 1;
     }
