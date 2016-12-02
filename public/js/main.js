@@ -5,37 +5,57 @@ var key_state = {'left': false, 'right': false, 'up': false, 'down': false};
 const constants = {
   // Avatars
   'avatar': [ 'avatarStar.png',
-              'avatarYoshi.png',
+              'avatarSkull.png',
               'avatarDarth.png',
-              'avatarDeadmau5.jpg',
-              'avatarMemeface.png',
-              'avatarSmiley.png',
-              'avatarFrown.png',
-              'avatarLaugh.jpg',
-              'avatarLaugh.jpg',
-              'avatarLaugh.jpg',
-              'avatarLaugh.jpg'],
+              'avatarBone.png',
+              'avatarFish.png',
+              'avatarDeathstar.png',
+              'avatarGhost.png',
+              'avatarSpider.png',
+              'avatarBomb.png',
+              'avatarSwords.png',
+              'avatarDragon.png',
+              'avatarFlame.png',
+              'avatarBatman.png',
+              'avatarDragon2.png',
+              'avatarPokeball.png',
+              'avatarShield.png',
+              'avatarHeart.png',
+              'avatarGladiator.png',
+              'avatarKnight.png',
+              'avatarRadioactive.png',
+              'avatarTiefighter.png',
+              'avatarSaturn.png',
+              'avatarWand.png',
+              'avatarUniverse.png',
+              'avatarNuke.png',
+              'avatarRocket.png',
+              'avatarPirate.png'],
   'avatarPos': {x:0, y:-20},
   'avatarSpacing': 50,
   'avatarColumns': 9,
-  'avatarSize': {'w':40, 'h':40},
+  'avatarSize': {w:35, h:35},
   // Buttons
   'button': ['blueButton.jpg'],
-  'buttonPos': [{'x':320, 'y':370}],
-  'buttonSize': [{'w':120, 'h':40}],
+  'buttonPos': [{x:0, y:165}],
+  'buttonSize': [{w:120, h:40}],
   // Text
-  'text': [ 'Poly Wars',
+  'textJoin': [ 'Poly Wars',
             'Choose your Player',
-            'Enter Game'],
-  'textSize': [ 80,
+            'Enter Game',
+            'Created by: Ashton Meuser & Zachary Lang'],
+  'textJoinSize': [ 80,
                 20,
-                15],
-  'textColor': [ 'black',
-                'black',
-                'black'],
-  'textPos': [{'x':380, 'y':90},
-              {'x':380, 'y':180},
-              {'x':380, 'y':390}]
+                15,
+                12],
+  'textJoinColor': ['black',
+                    'black',
+                    'black',
+                    'black'],
+  'textJoinPos': [{x:0, y:-150},
+                  {x:0, y:-50},
+                  {x:0, y:165},
+                  {x:250, y:210}]
 };
 
 window.onload = function() {
@@ -131,6 +151,7 @@ function handleResizeCanvas(gameView) {
 function handleClick(event, gameView, game, socket) {
   var mousePos = {x: 0, y:0};
   var avatarSelection = -1;
+  var rows = Math.ceil(constants.avatar.length/constants.avatarColumns);
   if(event.type === 'touchstart'){
     var tempX = (event.changedTouches[0].clientX-canvas.offsetLeft)*gameView.scale;
     var tempY = (event.changedTouches[0].clientY-canvas.offsetTop)*gameView.scale;
@@ -143,13 +164,11 @@ function handleClick(event, gameView, game, socket) {
 
   // Detect item clicked.
   // Enter game button.
-  if (mousePos.x > constants.buttonPos[0].x && mousePos.x < (constants.buttonPos[0].x + constants.buttonSize[0].w)
-    && mousePos.y > constants.buttonPos[0].y && mousePos.y < (constants.buttonPos[0].y + constants.buttonSize[0].h)
-    && gameView.avatarAvailable[gameView.avatarSelection] == 1){
+  var center = {x: gameView.bounds.x/2+constants.buttonPos[0].x, y:gameView.bounds.y/2+constants.buttonPos[0].y}
+  if(Math.abs(mousePos.x-center.x)<constants.buttonSize[0].w/2 && Math.abs(mousePos.y-center.y)<constants.buttonSize[0].h/2 && gameView.avatarAvailable[gameView.avatarSelection] == 1){
     socket.emit('addPlayer', gameView.avatarSelection);
   }
   // Avatar hit.
-  var rows = Math.ceil(constants.avatar.length/constants.avatarColumns);
   for (var i = 0; i < constants.avatar.length; i++){
     var center = {x: gameView.bounds.x/2+constants.avatarPos.x+(i%constants.avatarColumns-constants.avatarColumns/2)*constants.avatarSpacing+constants.avatarSize.w/2, y:gameView.bounds.y/2+constants.avatarPos.y+Math.floor(i/constants.avatarColumns)*constants.avatarSpacing+constants.avatarSize.h/2}
     if(Math.abs(mousePos.x-center.x)<constants.avatarSize.w/2 && Math.abs(mousePos.y-center.y)<constants.avatarSize.h/2){

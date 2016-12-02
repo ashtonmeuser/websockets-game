@@ -35,26 +35,26 @@ GameView.prototype.update = function() {
 
           // Text, Avatars and Buttons
           for (var i = 0; i < constants.button.length; i++){
-            this.drawImage(constants.button[i], constants.buttonPos[i], constants.buttonSize[i], false);
+            this.drawImage(constants.button[i], {x: this.bounds.x/2+constants.buttonPos[i].x-constants.buttonSize[i].w/2, y: this.bounds.y/2+constants.buttonPos[i].y-constants.buttonSize[i].h/2}, constants.buttonSize[i], false);
           }
-          for (var i = 0; i < constants.text.length; i++){
-            this.drawLabel(constants.textPos[i], constants.text[i], constants.textColor[i], '', constants.textSize[i])
+          for (var i = 0; i < constants.textJoin.length; i++){
+            this.drawLabel(constants.textJoinPos[i], constants.textJoin[i], constants.textJoinColor[i], '', constants.textJoinSize[i])
           }
           this.drawAvatars(this.avatarSelection);
       break;
     case 'queue':
       this.drawTextScreen(0.6);
       var message = (this.game.state.nextGame < 0) ? 'Waiting for players' : 'Game starts in '+this.game.state.nextGame+'s';
-      this.drawLabel({x:this.bounds.x/2, y:200}, 'Queue', 'black');
-      this.drawLabel({x:this.bounds.x/2, y:300}, message, 'black');
+      this.drawLabel({x:0, y:-50}, 'Queue', 'black');
+      this.drawLabel({x:0, y:50}, message, 'black');
       break;
     case 'play':
       this.drawHud(0.5, this.game.state.ammo, this.game.state.nextPhase);
       break;
     case 'results':
       this.drawTextScreen(0.6);
-      this.drawLabel({x:this.bounds.x/2, y:200}, 'Results', 'black');
-      this.drawLabel({x:this.bounds.x/2, y:300}, 'Game starts in '+this.game.state.nextGame+'s', 'black');
+      this.drawLabel({x:0, y:-50}, 'Results', 'black');
+      this.drawLabel({x:0, y:50}, 'Game starts in '+this.game.state.nextGame+'s', 'black');
       break;
   }
 };
@@ -99,8 +99,8 @@ GameView.prototype.drawHud = function(alpha, ammo, timeout) {
   this.context.lineTo(27.01, 52.07);
   this.context.stroke();
   this.context.closePath();
-  this.drawLabel({x:35, y:20}, ammo, 'rgba(0, 0, 0, '+alpha+')', 'left', 20);
-  this.drawLabel({x:35, y:45}, timeout, 'rgba(0, 0, 0, '+alpha+')', 'left', 20);
+  this.drawLabel({x:-365, y:-205}, ammo, 'rgba(0, 0, 0, '+alpha+')', 'left', 20);
+  this.drawLabel({x:-365, y:-180}, timeout, 'rgba(0, 0, 0, '+alpha+')', 'left', 20);
 };
 GameView.prototype.drawTextScreen = function(alpha) {
   this.context.fillStyle = 'rgba(255, 255, 255, '+alpha+')';
@@ -127,24 +127,24 @@ GameView.prototype.drawImage = function(source, position, size, round){
   var imgObject = new Image();
 
   imgObject.src = source;
-  if (round){
-    this.context.save();
-    this.context.beginPath();
-    this.context.arc(position.x+size.w/2, position.y+size.h/2, size.h/2, 0, 2*Math.PI, false);
-    this.context.closePath();
-    this.context.clip();
+  // if (round){
+  //   this.context.save();
+  //   this.context.beginPath();
+  //   this.context.arc(position.x+size.w/2, position.y+size.h/2, size.h/2, 0, 2*Math.PI, false);
+  //   this.context.closePath();
+  //   this.context.clip();
+  //   this.context.drawImage(imgObject, position.x, position.y, size.w, size.h);
+  //   this.context.restore();
+  // } else{
     this.context.drawImage(imgObject, position.x, position.y, size.w, size.h);
-    this.context.restore();
-  } else{
-    this.context.drawImage(imgObject, position.x, position.y, size.w, size.h);
-  }
+  // }
 }
 GameView.prototype.drawLabel = function(position, text, color, align, size) {
   this.context.fillStyle = color || 'white';
   this.context.textAlign = align || 'center';
   this.context.textBaseline = 'middle';
   this.context.font = 'bold '+(size || 25)+'px Arial';
-  this.context.fillText(text, position.x, position.y);
+  this.context.fillText(text, this.bounds.x/2 + position.x, this.bounds.y/2 + position.y);
 }
 GameView.prototype.avatarSelect = function(selection){
   this.avatarSelection = selection;

@@ -60,13 +60,14 @@ Game.prototype.addPlayer = function(player) {
   if(this.teams.length < 1) return;
   var smallestTeam = this.teams.sort(function(a, b) {return (a.length > b.length) ? 1 : -1;})[0];
   player.assignTeam(smallestTeam);
-
+  player.alive = true;
   this.players.push(player);
   this.world.add(player);
 
   if(this.phaseTime.nextGame<new Date().getTime() && this.aliveTeams().length>1){
     this.setPhase('play');
   }
+
 };
 Game.prototype.addId = function(id, avatar) {
   var player = new Player(id, avatar);

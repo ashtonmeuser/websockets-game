@@ -25,7 +25,7 @@ Player.prototype.toState = function() {
     name: this.name,
     radius: this.body.radius,
     position: this.body.state.pos.values(),
-    avatar: this.avatar||'avatarDarth.png'
+    avatar: this.avatar
   };
 };
 Player.prototype.assignTeam = function(team) {
