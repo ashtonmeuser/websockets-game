@@ -59,15 +59,15 @@ Game.prototype.nextPhase = function(phase) {
 Game.prototype.addPlayer = function(player) {
   if(this.teams.length < 1) return;
   var smallestTeam = this.teams.sort(function(a, b) {return (a.length > b.length) ? 1 : -1;})[0];
-  player.assignTeam(smallestTeam);
   player.alive = true;
+  player.addBody();
+  player.assignTeam(smallestTeam);
   this.players.push(player);
   this.world.add(player);
 
   if(this.phaseTime.nextGame<new Date().getTime() && this.aliveTeams().length>1){
     this.setPhase('play');
   }
-
 };
 Game.prototype.addId = function(id, avatar) {
   var player = new Player(id, avatar);
@@ -85,7 +85,7 @@ Game.prototype.removeId = function(id) {
     var index = this.players.indexOf(player);
     if(index >= 0) this.players.splice(index, 1);
   }
-  var player = this.getQueued(id); // DEBUG
+  var player = this.getQueued(id); // TODO: Refactor
   if(player !== undefined){
     player.delete();
     var index = this.queue.indexOf(player);
@@ -122,7 +122,7 @@ Game.prototype.addObstacles = function() {
     {x: 670, y: 56.25+112.5*3, h: 112.5},
     // Known horizontal
     {x: 137.5, y: 225, w: 275},
-    {x: 662.5, y: 225, w: 275},
+    {x: 662.5, y: 225, w: 275}
   ];
 
   // Push horizontal obstacle, prevent closing in a corner

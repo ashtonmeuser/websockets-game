@@ -29,8 +29,8 @@ Game.prototype.updatePlayerAcceleration = function(x, y) {
 Game.prototype.shootProjectile = function(x, y) {
   this.socket.emit('shootProjectile', x, y);
 }
-Game.prototype.addPlayer = function() {
-  this.socket.emit('addPlayer');
+Game.prototype.addPlayer = function(avatar) {
+  this.socket.emit('addPlayer', avatar);
 }
 Game.prototype.getPlayer = function(id) {
   var matches = this.state.players.filter(function(player) {

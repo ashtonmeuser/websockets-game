@@ -10,9 +10,6 @@ function Player(id, avatar) {
   this.maxAmmo = 5;
   this.acceleration = 0.005;
   this.alive = true;
-  this.body = Physics.body('player', {
-    owner: this
-  });
   this.avatar = avatar;
 }
 
@@ -27,6 +24,11 @@ Player.prototype.toState = function() {
     position: this.body.state.pos.values(),
     avatar: this.avatar
   };
+};
+Player.prototype.addBody = function() {
+  this.body = Physics.body('player', {
+    owner: this
+  });
 };
 Player.prototype.assignTeam = function(team) {
   this.team = team;

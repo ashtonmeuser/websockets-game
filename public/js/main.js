@@ -1,63 +1,6 @@
 let key_code = {'left': [37, 65], 'right': [39, 68], 'up': [38, 87], 'down': [40, 83]};
 var key_state = {'left': false, 'right': false, 'up': false, 'down': false};
 
-// Constructor
-const constants = {
-  // Avatars
-  'avatar': [ 'avatarStar.png',
-              'avatarSkull.png',
-              'avatarDarth.png',
-              'avatarBone.png',
-              'avatarFish.png',
-              'avatarDeathstar.png',
-              'avatarGhost.png',
-              'avatarSpider.png',
-              'avatarBomb.png',
-              'avatarSwords.png',
-              'avatarDragon.png',
-              'avatarFlame.png',
-              'avatarBatman.png',
-              'avatarDragon2.png',
-              'avatarPokeball.png',
-              'avatarShield.png',
-              'avatarHeart.png',
-              'avatarGladiator.png',
-              'avatarKnight.png',
-              'avatarRadioactive.png',
-              'avatarTiefighter.png',
-              'avatarSaturn.png',
-              'avatarWand.png',
-              'avatarUniverse.png',
-              'avatarNuke.png',
-              'avatarRocket.png',
-              'avatarPirate.png'],
-  'avatarPos': {x:0, y:-20},
-  'avatarSpacing': 50,
-  'avatarColumns': 9,
-  'avatarSize': {w:35, h:35},
-  // Buttons
-  'button': ['blueButton.jpg'],
-  'buttonPos': [{x:0, y:165}],
-  'buttonSize': [{w:120, h:40}],
-  // Text
-  'textJoin': [ 'Poly Wars',
-            'Choose your Player',
-            'Enter Game',
-            'Created by: Ashton Meuser & Zachary Lang'],
-  'textJoinSize': [ 80,
-                20,
-                15,
-                12],
-  'textJoinColor': ['black',
-                    'black',
-                    'black',
-                    'black'],
-  'textJoinPos': [{x:0, y:-150},
-                  {x:0, y:-50},
-                  {x:0, y:165},
-                  {x:250, y:210}]
-};
-
 window.onload = function() {
   var socket = io();
   var canvas = document.getElementById('canvas');
@@ -66,7 +9,7 @@ window.onload = function() {
   var mobile = (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
   socket.on('initialize', function(data) {
-    game.id = data.id;
+    game.id = socket.id;
     gameView.bounds = data.bounds;
     canvas.style.display = 'block';
     if(mobile){ // Portrait
@@ -78,14 +21,12 @@ window.onload = function() {
       canvas.height = gameView.bounds['y'];
     }
     handleResizeCanvas(gameView);
-    // gameView.populateAvatars();
   });
 
   socket.on('state', function(state) {
     window.s = state; // DEBUG
     window.g = game; // DEBUG
     game.updateState(state);
-    gameView.populateAvatars();
   });
 
   (function animate(){ // Recursive animation call
@@ -149,35 +90,24 @@ function handleResizeCanvas(gameView) {
 }
 
 function handleClick(event, gameView, game, socket) {
-  var mousePos = {x: 0, y:0};
-  var avatarSelection = -1;
-  var rows = Math.ceil(constants.avatar.length/constants.avatarColumns);
+  var clickPosition = {x: 0, y:0};
+
   if(event.type === 'touchstart'){
     var tempX = (event.changedTouches[0].clientX-canvas.offsetLeft)*gameView.scale;
     var tempY = (event.changedTouches[0].clientY-canvas.offsetTop)*gameView.scale;
-    mousePos.x = tempY;
-    mousePos.y = -tempX + gameView.bounds.y;
+    clickPosition.x = tempY;
+    clickPosition.y = -tempX + gameView.bounds.y;
   }else if(event.type === 'click'){
-    mousePos.x = (event.clientX-canvas.offsetLeft)*gameView.scale;
-    mousePos.y = (event.clientY-canvas.offsetTop)*gameView.scale;
+    clickPosition.x = (event.clientX-canvas.offsetLeft)*gameView.scale;
+    clickPosition.y = (event.clientY-canvas.offsetTop)*gameView.scale;
   }
 
-  // Detect item clicked.
-  // Enter game button.
-  var center = {x: gameView.bounds.x/2+constants.buttonPos[0].x, y:gameView.bounds.y/2+constants.buttonPos[0].y}
-  if(Math.abs(mousePos.x-center.x)<constants.buttonSize[0].w/2 && Math.abs(mousePos.y-center.y)<constants.buttonSize[0].h/2 && gameView.avatarAvailable[gameView.avatarSelection] == 1){
-    socket.emit('addPlayer', gameView.avatarSelection);
+  if(game.state.phase === 'join'){
+    gameView.buttonHit(clickPosition.x, clickPosition.y);
+    gameView.avatarHit(clickPosition.x, clickPosition.y);
+  }else{
+    game.shootProjectile(clickPosition.x, clickPosition.y);
   }
-  // Avatar hit.
-  for (var i = 0; i < constants.avatar.length; i++){
-    var center = {x: gameView.bounds.x/2+constants.avatarPos.x+(i%constants.avatarColumns-constants.avatarColumns/2)*constants.avatarSpacing+constants.avatarSize.w/2, y:gameView.bounds.y/2+constants.avatarPos.y+Math.floor(i/constants.avatarColumns)*constants.avatarSpacing+constants.avatarSize.h/2}
-    if(Math.abs(mousePos.x-center.x)<constants.avatarSize.w/2 && Math.abs(mousePos.y-center.y)<constants.avatarSize.h/2){
-      if (gameView.avatarAvailable[i] == 1){
-        gameView.avatarSelection = i;
-      }
-    }
-  }
-  game.shootProjectile(mousePos.x, mousePos.y);
   event.preventDefault();
 }
 
