@@ -9,7 +9,10 @@ function GameView(game, canvas, page) {
   this.context = this.canvas.getContext('2d');
   this.scale = 1;
   this.avatarSelection = -1;
-  this.avatarAvailable = Array.apply(null, Array(constants.avatar.length)).map(Number.prototype.valueOf,1);;
+  // this.allAvatarAvailable = Array.apply(null, Array(constants.avatar.length)).map(Number.prototype.valueOf,1);
+  this.allAvatarAvailable = [];
+  for(var i=0; i<constants.avatar.length; i++) this.allAvatarAvailable.push(1);
+  this.avatarAvailable = this.allAvatarAvailable.slice();
 }
 
 // Class methods
@@ -167,7 +170,9 @@ GameView.prototype.avatarSelect = function(selection){
   this.avatarSelection = selection;
 }
 GameView.prototype.populateAvatars = function(){
+  this.avatarAvailable.length = 0;
+  for(var i=0; i<constants.avatar.length; i++) this.avatarAvailable.push(1);
   this.game.state.players.forEach(function(player) {
-  this.avatarAvailable[this.game.state.players.avatar] = 0;
+    this.avatarAvailable[player.avatar] = 0;
   }.bind(this));
 }

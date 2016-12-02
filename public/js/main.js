@@ -64,22 +64,23 @@ window.onload = function() {
       canvas.height = gameView.bounds['y'];
     }
     handleResizeCanvas(gameView);
-    gameView.populateAvatars();
+    // gameView.populateAvatars();
   });
 
   socket.on('state', function(state) {
     window.s = state; // DEBUG
     window.g = game; // DEBUG
     game.updateState(state);
+    gameView.populateAvatars();
   });
 
-  socket.on('avatarChosen', function(avatar) {
-    gameView.avatarAvailable[avatar] = 0;
-  });
+  // socket.on('avatarChosen', function(avatar) {
+  //   gameView.avatarAvailable[avatar] = 0;
+  // });
 
-  socket.on('avatarFreed', function(avatar) {
-    gameView.avatarAvailable[avatar] = 1;
-  });
+  // socket.on('avatarFreed', function(avatar) {
+  //   gameView.avatarAvailable[avatar] = 1;
+  // });
 
   (function animate(){ // Recursive animation call
     getUserInput(game);
@@ -168,12 +169,14 @@ function handleClick(event, gameView, game, socket) {
   for (var i = 0; i < constants.avatar.length; i++){
     if (mousePos.x > constants.avatarPos[i].x && mousePos.x < (constants.avatarPos[i].x + constants.avatarSize.w)
       && mousePos.y > constants.avatarPos[i].y && mousePos.y < (constants.avatarPos[i].y + constants.avatarSize.h)){
-      avatarSelection = i;
+      if (gameView.avatarAvailable[i] == 1){
+        gameView.avatarSelection = i;
+      }
     }
   }
-  if (avatarSelection >= 0){
-    gameView.avatarSelect(avatarSelection);
-  }
+  // if (avatarSelection >= 0){
+  //   gameView.avatarSelect(avatarSelection);
+  // }
   game.shootProjectile(mousePos.x, mousePos.y);
   event.preventDefault();
 }
