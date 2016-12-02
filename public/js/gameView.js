@@ -168,7 +168,7 @@ GameView.prototype.buttonHit = function(x, y) {
     x: this.bounds.x/2+this.buttonOffset.x,
     y: this.bounds.y/2+this.buttonOffset.y
   };
-  if(Math.abs(x-center.x)<this.buttonSize.x && Math.abs(y-center.y)<this.buttonSize.y && this.avatarSelection!==undefined){
+  if(Math.abs(x-center.x)<this.buttonSize.x/2 && Math.abs(y-center.y)<this.buttonSize.y/2 && this.avatarSelection!==undefined){
     this.game.addPlayer(this.avatarSelection);
   }
 };
