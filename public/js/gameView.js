@@ -36,6 +36,13 @@ GameView.prototype.update = function() {
       this.drawAlphaScreen();
       var message = (this.game.state.nextGame < 0) ? 'Waiting for players' : 'Game starts in '+this.game.state.nextGame+'s';
       this.drawLabel({x:this.bounds.x/2, y:200}, 'Preparing next game', 'black');
+      this.drawLabel({x:this.bounds.x/2-350, y:120}, 'Computer Controls', 'black', 'left', 20);
+      this.drawLabel({x:this.bounds.x/2-350, y:160}, 'Movement - W, A, S, D or ', 'black', 'left', 15);
+      this.drawLabel({x:this.bounds.x/2-350, y:180}, 'Up, Down, Left Right', 'black', 'left', 15);
+      this.drawLabel({x:this.bounds.x/2-350, y:200}, 'Fire - Click', 'black', 'left', 15);
+      this.drawLabel({x:this.bounds.x/2-350, y:240}, 'Mobile Controls', 'black', 'left', 20);
+      this.drawLabel({x:this.bounds.x/2-350, y:280}, 'Movement - Rotate phone', 'black', 'left', 15);
+      this.drawLabel({x:this.bounds.x/2-350, y:300}, 'Fire - tap', 'black', 'left', 15);
       this.drawLabel({x:this.bounds.x/2, y:250}, message, 'black');
       break;
     case 'play':
