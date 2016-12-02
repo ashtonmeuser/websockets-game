@@ -22,7 +22,7 @@ Obstacle.prototype.toState = function() {
   };
 };
 Obstacle.prototype.delete = function() {
-  this.body._world.remove(this.body);
+  if(this.body._world) this.body._world.remove(this.body);
 };
 
 // Class methods

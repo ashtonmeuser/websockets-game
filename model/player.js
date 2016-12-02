@@ -6,20 +6,14 @@ var Physics = require('physicsjs');
 // Constructor
 function Player(id, team, avatar) {
   this.id = id;
-  this.team = team;
-  this.team.addPlayer();
-  this.name = this.team.nextName;
   this.ammo = 3;
   this.maxAmmo = 5;
   this.acceleration = 0.005;
   this.alive = true;
   this.body = Physics.body('player', {
-    x: this.team.coordinates.x + Random.rangedRandomFloat(-40, 40),
-    y: this.team.coordinates.y + Random.rangedRandomFloat(-40, 40),
     owner: this
   });
   this.avatar = avatar;
-  this.body.sleep(false);
 }
 
 // Instance methods
@@ -34,9 +28,17 @@ Player.prototype.toState = function() {
     avatar: this.avatar||'avatarDarth.png'
   };
 };
+Player.prototype.assignTeam = function(team) {
+  this.team = team;
+  this.team.addPlayer();
+  this.name = this.team.nextName;
+  this.body.state.pos.x = this.team.coordinates.x + Random.rangedRandomFloat(-40, 40);
+  this.body.state.pos.y = this.team.coordinates.y + Random.rangedRandomFloat(-40, 40);
+  this.body.sleep(false);
+};
 Player.prototype.delete = function() {
-  this.team.removePlayer();
-  this.body._world.remove(this.body);
+  if(this.team) this.team.removePlayer();
+  if(this.body._world) this.body._world.remove(this.body);
 };
 Player.prototype.shootProjectile = function(x, y) {
   if(this.ammo>0 && this.alive){

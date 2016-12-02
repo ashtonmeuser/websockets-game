@@ -56,10 +56,10 @@ Game.prototype.nextPhase = function(phase) {
     case 'results': return 'queue';
   }
 };
-Game.prototype.addPlayer = function(id, avatar) {
+Game.prototype.addPlayer = function(player) {
   if(this.teams.length < 1) return;
   var smallestTeam = this.teams.sort(function(a, b) {return (a.length > b.length) ? 1 : -1;})[0];
-  var player = new Player(id, smallestTeam, avatar);
+  player.assignTeam(smallestTeam);
 
   this.players.push(player);
   this.world.add(player);
@@ -72,7 +72,7 @@ Game.prototype.addId = function(id, avatar) {
   if(this.phase === 'queue'){
     this.addPlayer(id, avatar);
   }else{
-    this.queue.push(id);
+    this.queue.push(player);
   }
 };
 Game.prototype.removeId = function(id) {
@@ -82,8 +82,12 @@ Game.prototype.removeId = function(id) {
     var index = this.players.indexOf(player);
     if(index >= 0) this.players.splice(index, 1);
   }
-  var index = this.queue.indexOf(id);
-  if(index >= 0) this.queue.splice(index, 1);
+  var player = this.getQueued(id); // DEBUG
+  if(player !== undefined){
+    player.delete();
+    var index = this.queue.indexOf(player);
+    if(index >= 0) this.queue.splice(index, 1);
+  }
 };
 Game.prototype.ammoPickup = function(player, projectile) {
   player.ammoPickup(projectile);
@@ -145,7 +149,7 @@ Game.prototype.step = function() {
 };
 Game.prototype.reset = function() {
   this.players.forEach(function(player) {
-    this.queue.push(player.id);
+    this.queue.push(player);
     player.delete();
   }.bind(this));
   this.projectiles.forEach(function(projectile) {projectile.delete();});
@@ -158,15 +162,15 @@ Game.prototype.reset = function() {
   this.addAmmo(10);
   this.addTeams(['red', 'blue', 'green', 'purple']);
 
-  this.queue.forEach(function(id) {
-    this.addPlayer(id);
+  this.queue.forEach(function(player) {
+    this.addPlayer(player);
   }.bind(this));
   this.queue.length = 0;
 };
 Game.prototype.state = function() {
   return {
     phase: this.phase,
-    queue: this.queue,
+    queue: this.queue.map(function(player) {return player.id;}),
     nextPhase: Math.ceil((this.phaseTime.nextPhase-new Date().getTime())/1000),
     nextGame: Math.ceil((this.phaseTime.nextGame-new Date().getTime())/1000),
     players: this.players.map(function(player) {return player.toState();}),
@@ -189,6 +193,13 @@ Game.prototype.aliveTeams = function() {
 };
 Game.prototype.getPlayer = function(id) {
   var matches = this.players.filter(function(player) {
+    return player.id == id;
+  });
+  if(matches.length > 0)
+    return matches[0];
+};
+Game.prototype.getQueued = function(id) {
+  var matches = this.queue.filter(function(player) {
     return player.id == id;
   });
   if(matches.length > 0)
