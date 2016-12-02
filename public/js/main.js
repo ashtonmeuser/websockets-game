@@ -39,8 +39,8 @@ window.onload = function() {
   window.addEventListener('keyup', handleKeyUp, true);
   window.addEventListener('resize', function(event) {handleResizeCanvas(gameView);}, false);
   if(mobile){
-    canvas.addEventListener('touchstart', handleGameClick, false);
-    window.addEventListener('deviceorientation', handleAccelerometer, false);
+    canvas.addEventListener('touchstart', function(event){handleClick(event, gameView, game, socket);}, false);
+    window.addEventListener('deviceorientation', function(event){handleAccelerometer(event, game);}, false);
   }else{
     canvas.addEventListener('click', function(event){handleClick(event, gameView, game, socket);}, false);
   }

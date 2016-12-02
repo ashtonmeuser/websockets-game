@@ -43,8 +43,8 @@ GameView.prototype.update = function() {
       break;
     case 'results':
       this.drawAlphaScreen();
-      var message = (this.game.state.winningTeam===undefined) ? 'Tie game' : this.game.state.winningTeam.charAt(0).toUpperCase()+this.game.state.winningTeam.slice(1)+' team wins';
-      this.drawLabel({x:this.bounds.x/2, y:200}, message, 'black');
+      var message = (this.game.state.winningTeam===undefined) ? 'Tie game' : this.game.state.winningTeam.name.charAt(0).toUpperCase()+this.game.state.winningTeam.name.slice(1)+' team wins';
+      this.drawLabel({x:this.bounds.x/2, y:200}, message, this.game.state.winningTeam.color);
       this.drawLabel({x:this.bounds.x/2, y:250}, 'Game starts in '+this.game.state.nextGame+'s', 'black');
       break;
   }

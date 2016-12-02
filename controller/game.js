@@ -184,7 +184,13 @@ Game.prototype.checkEndgame = function() {
   if(this.phase !== 'play') return;
   var aliveTeams = this.aliveTeams();
   if(aliveTeams.length <= 1){
-    this.winningTeam = aliveTeams[0].name;
+    try{
+      var team = aliveTeams[0];
+    }catch(e){
+      this.winningTeam = undefined;
+      return;
+    }
+    this.winningTeam = {name: team.name, color: team.aliveColor.string()};
     this.setPhase('results');
   }
 };
