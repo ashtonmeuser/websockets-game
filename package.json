@@ -6,8 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "mocha tests",
-    "nodemon": "nodemon server.js"
+    "test": "mocha tests"
   },
   "dependencies": {
     "ejs": "^2.5.1",
@@ -22,7 +21,6 @@
   "license": "MIT",
   "devDependencies": {
     "chai": "^2.3.0",
-    "mocha": "^3.1.2",
-    "nodemon": "^1.3.7"
+    "mocha": "^3.1.2"
   }
 }
